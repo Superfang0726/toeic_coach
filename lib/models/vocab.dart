@@ -1,5 +1,6 @@
 enum Level { red, yellow, green }
-enum MemoryState { redLow, redMedium, redHigh, yellowLow, yellowHigh, green}
+
+enum MemoryState { redLow, redMedium, redHigh, yellowLow, yellowHigh, green }
 
 class Vocab {
   String id;
@@ -11,11 +12,11 @@ class Vocab {
 
   //constructor
   Vocab({
-    required this.id, 
-    required this.word, 
-    required this.mean, 
-    required this.level, 
-    required this.memoryState, 
-    required this.cooldown
+    required this.id,
+    required this.word,
+    required this.mean,
+    required this.level,
+    required this.memoryState,
+    required this.cooldown,
   });
 }

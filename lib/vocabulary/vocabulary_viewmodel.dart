@@ -1,20 +1,69 @@
+import 'package:toeic_coach/models/vocab.dart';
+import 'package:toeic_coach/store/app_store.dart';
+import 'vocab_domain.dart';
+import 'excel_repository.dart';
+
+class VocabularyViewmodel {
+  Store store;
+  ExcelRepository excelRepository;
+
+  //constructor
+  VocabularyViewmodel({required this.store, required this.excelRepository});
+
   //methods
-  void addVocab(List<Vocab> currentVocabs, Vocab newVocab) {
+  void addVocab({
+    required String word,
+    required String mean,
+    required Level level, //Level will decide the memoryState
+  }) {
+    final currentVocabs = store.vocabulary;
+
+    //alert user the vocab has existed and stop adding new vocab
+    if (VocabDomain.checkVocabExist(currentVocabs, word))
+      return; //TODO: alert user
+
+    String id = VocabDomain.generateUuid();
+    MemoryState memoryState = VocabDomain.getDefaultMemoryState(level);
+
+    Vocab newVocab = Vocab(
+      id: id,
+      word: word,
+      mean: mean,
+      level: level,
+      memoryState: memoryState,
+      cooldown: 0,
+    );
     currentVocabs.add(newVocab);
-    _writeExcel(currentVocabs);
+
+    //write in
+    store.updateStore(currentVocabs);
+    excelRepository.writeExcel(currentVocabs);
   }
 
-  List<Vocab> searchVocab(String param) {
+  List<Vocab> searchVocab({required String target}) {
+    final currentVocabs = store.vocabulary;
 
+    return currentVocabs.where((vocab) => vocab.word.contains(target)).toList();
   }
 
-  void deleteVocab(List<Vocab> currentVocabs, Vocab target) {
+  void deleteVocab(Vocab target) {
+    final currentVocabs = store.vocabulary;
     currentVocabs.removeWhere((vocab) => vocab.word == target.word);
-    _writeExcel(currentVocabs);
+
+    //write in
+    store.updateStore(currentVocabs);
+    excelRepository.writeExcel(currentVocabs);
   }
 
-  void updateVocab(List<Vocab> currentVocabs, Vocab updatedVocab) {
-    final int index = currentVocabs.indexWhere((vocab) => vocab.id == updatedVocab.id);
+  void updateVocab(Vocab updatedVocab) {
+    final currentVocabs = store.vocabulary;
+    final int index = currentVocabs.indexWhere(
+      (vocab) => vocab.id == updatedVocab.id,
+    );
     currentVocabs[index] = updatedVocab;
-    _writeExcel(currentVocabs);
+
+    //write in
+    store.updateStore(currentVocabs);
+    excelRepository.writeExcel(currentVocabs);
   }
+}
