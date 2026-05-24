@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toeic_coach/models/vocab.dart';
+import 'package:toeic_coach/vocabulary/database_UI.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 import 'store/app_store.dart';
 import 'vocabulary/excel_repository.dart';
@@ -28,7 +29,14 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+      home: Scaffold(
+        body: Row(
+          children: [
+            Expanded(child: Placeholder()),
+            Expanded(child: DatabaseUi()),
+          ],
+        ),
+      ),
     );
   }
 }
