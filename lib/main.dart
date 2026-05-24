@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'store/app_store.dart';
+import 'vocabulary/excel_repository.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Store store = Store();
+  ExcelRepository excelRepository = await ExcelRepository.create();
+  store.updateStore(excelRepository.readExcel());
+
+  runApp(
+    ChangeNotifierProvider.value(
+      value: store, // 已經建立好的 store
+      child: const MainApp(),
+    )
+  );
 }
 
 class MainApp extends StatelessWidget {
