@@ -122,9 +122,7 @@ class _DatabaseUiState extends State<DatabaseUi> {
               left: 0,
               top: height / 2,
               child: IconButton(
-                onPressed: () => setState(() {
-                  widget.onToggle(false);
-                }),
+                onPressed: () => widget.onToggle(false),
                 icon: Icon(Icons.chevron_right),
               ),
             ),
