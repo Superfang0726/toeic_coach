@@ -51,16 +51,6 @@ class _DatabaseUiState extends State<DatabaseUi> {
         final height = constraints.maxHeight;
         return Stack(
           children: [
-            Positioned(
-              left: 0,
-              top: height / 2,
-              child: IconButton(
-                onPressed: () => setState(() {
-                  _isVisible = false;
-                }),
-                icon: Icon(Icons.chevron_right),
-              ),
-            ),
             Column(
               children: [
                 //This Row is where user enter a word
@@ -116,6 +106,14 @@ class _DatabaseUiState extends State<DatabaseUi> {
                   ),
                 ),
               ],
+            ),
+            Positioned(
+              left: 0,
+              top: height / 2,
+              child: IconButton(
+                onPressed: () => setState(() => _isVisible = false),
+                icon: Icon(Icons.chevron_right),
+              ),
             ),
           ],
         );
