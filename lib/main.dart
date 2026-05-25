@@ -23,17 +23,41 @@ void main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
   @override
+  State<MainApp> createState() => MainAppState();
+}
+
+class MainAppState extends State<MainApp> {
+  bool _isDatabaseUiVisible = true;
+
+  @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: Scaffold(
         body: Row(
           children: [
             Expanded(child: Placeholder()),
-            Expanded(child: DatabaseUi()),
+            _isDatabaseUiVisible
+                ? Expanded(
+                    child: DatabaseUi(
+                      isVisible: _isDatabaseUiVisible,
+                      onToggle: (value) => setState(() {
+                        _isDatabaseUiVisible = value;
+                      }),
+                    ),
+                  )
+                : SizedBox(
+                    width: 48.0,
+                    child: DatabaseUi(
+                      isVisible: _isDatabaseUiVisible,
+                      onToggle: (value) => setState(() {
+                        _isDatabaseUiVisible = value;
+                      }),
+                    ),
+                  ),
           ],
         ),
       ),

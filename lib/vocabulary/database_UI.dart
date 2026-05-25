@@ -7,7 +7,15 @@ import 'package:toeic_coach/vocabulary/excel_repository.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 
 class DatabaseUi extends StatefulWidget {
-  const DatabaseUi({super.key});
+  final ValueChanged<bool> onToggle;
+  final bool isVisible;
+
+  //constructor
+  const DatabaseUi({
+    super.key,
+    required this.isVisible,
+    required this.onToggle,
+  });
 
   @override
   State<DatabaseUi> createState() => _DatabaseUiState();
@@ -18,7 +26,6 @@ class _DatabaseUiState extends State<DatabaseUi> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _meanController = TextEditingController();
   Level _selectedLevel = Level.red;
-  bool _isVisible = true;
 
   @override
   void initState() {
@@ -40,9 +47,11 @@ class _DatabaseUiState extends State<DatabaseUi> {
   Widget build(BuildContext context) {
     final List<Vocab> vocabs = context.watch<Store>().vocabulary;
 
-    if (!_isVisible) {
+    if (!widget.isVisible) {
       return IconButton(
-        onPressed: () => setState(() => _isVisible = true),
+        onPressed: () => setState(() {
+          widget.onToggle(true);
+        }),
         icon: Icon(Icons.chevron_right),
       );
     }
@@ -107,11 +116,15 @@ class _DatabaseUiState extends State<DatabaseUi> {
                 ),
               ],
             ),
+
+            //DatabaseUI fold Button
             Positioned(
               left: 0,
               top: height / 2,
               child: IconButton(
-                onPressed: () => setState(() => _isVisible = false),
+                onPressed: () => setState(() {
+                  widget.onToggle(false);
+                }),
                 icon: Icon(Icons.chevron_right),
               ),
             ),
