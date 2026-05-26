@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/vocabulary/database_UI.dart';
-import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 import 'store/app_store.dart';
 import 'vocabulary/excel_repository.dart';
 
