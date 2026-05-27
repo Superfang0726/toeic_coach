@@ -8,7 +8,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Store store = Store();
   ExcelRepository excelRepository = await ExcelRepository.create();
-  store.updateStore(excelRepository.readExcel());
+  store.updateVocabularyStore(excelRepository.readExcel());
 
   runApp(
     MultiProvider(
