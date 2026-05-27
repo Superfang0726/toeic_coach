@@ -36,7 +36,7 @@ class VocabularyViewmodel {
     currentVocabs.add(newVocab);
 
     //write in
-    store.updateStore(currentVocabs);
+    store.updateVocabularyStore(currentVocabs);
     excelRepository.writeExcel(currentVocabs);
   }
 
@@ -51,7 +51,7 @@ class VocabularyViewmodel {
     currentVocabs.removeWhere((vocab) => vocab.word == target.word);
 
     //write in
-    store.updateStore(currentVocabs);
+    store.updateVocabularyStore(currentVocabs);
     excelRepository.writeExcel(currentVocabs);
   }
 
@@ -63,7 +63,7 @@ class VocabularyViewmodel {
     currentVocabs[index] = updatedVocab;
 
     //write in
-    store.updateStore(currentVocabs);
+    store.updateVocabularyStore(currentVocabs);
     excelRepository.writeExcel(currentVocabs);
   }
 }
