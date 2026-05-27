@@ -1,4 +1,5 @@
 import 'package:toeic_coach/models/vocab.dart';
+import 'package:toeic_coach/models/option.dart';
 
 class PromptSetter {
   //method
@@ -21,5 +22,33 @@ Workflow:
     return buffer.toString();
   }
 
-  static String reviewPrompt() {}
+  static String reviewPrompt(Option userAnswer, List<String> unfamiliarWords) {
+    StringBuffer buffer = StringBuffer();
+    buffer.writeln("User's answer is ${userAnswer.label}: ${userAnswer.word}");
+
+    if (unfamiliarWords.isNotEmpty) {
+      buffer.writeln(
+        'And here are some unfamiliar vocabulary provided by user:',
+      );
+      for (String word in unfamiliarWords) {
+        buffer.writeln('$word,');
+      }
+    }
+
+    buffer.writeln("""
+Goal: Evaluate my answer, tell user if the answer is correct or not in traditional chinese. Besides, if my answer is wrong or I provide some vocabulary I am unfamiliar, choose some of it to use updateVocab tool.
+Workflow: 
+1. Evaluate the answer based on chat history.
+2. If the answer is correct, tell user the answer provided is correct, and upgrade memoryState by using updateVocab tool; if not, tell user which option is correct and why user's choice is wrong, and downgrade the memoryState by using updateVocab tool.
+""");
+
+    if (unfamiliarWords.isNotEmpty) {
+      buffer.writeln("""
+3. Tell user the mean of the unfamiliar vocabulary in the sentence.
+4. Downgrade the unfamiliar vocabulary by using updateVocab tool depends on how common it is. If it appear in TOEIC test usually or has enough confusion, downgrade it.
+""");
+    }
+
+    return buffer.toString();
+  }
 }
