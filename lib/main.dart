@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toeic_coach/chat/chat_viewmodel.dart';
-import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/settings/secure_storage_repository.dart';
 import 'package:toeic_coach/settings/shared_preferences_repository.dart';
 import 'package:toeic_coach/vocabulary/database_UI.dart';
