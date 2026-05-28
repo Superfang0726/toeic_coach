@@ -11,7 +11,7 @@ class SecureStorageRepository {
     await storage.write(key: 'api_key', value: apiKey);
   }
 
-  Future<String?> readAPI() async => await storage.read(key: 'api_key');
+  Future<String> readAPI() async => await storage.read(key: 'api_key') ?? '';
 
   Future<void> deleteAPI() async {
     await storage.delete(key: 'api_key');

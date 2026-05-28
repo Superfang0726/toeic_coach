@@ -11,6 +11,6 @@ class SharedPreferencesRepository {
     await sharedPreferences.setString('model', modelName);
   }
 
-  Future<String?> readModelName() async =>
+  Future<String> readModelName() async =>
       await sharedPreferences.getString('model') ?? 'gemma-4-31b-it';
 }
