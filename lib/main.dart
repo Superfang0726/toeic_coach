@@ -1,6 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toeic_coach/chat/chat_viewmodel.dart';
+import 'package:toeic_coach/models/option.dart';
+import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/settings/secure_storage_repository.dart';
 import 'package:toeic_coach/settings/shared_preferences_repository.dart';
 import 'package:toeic_coach/vocabulary/database_UI.dart';
@@ -17,29 +21,59 @@ void main() async {
   SharedPreferencesRepository sharedPreferencesRepository =
       SharedPreferencesRepository();
 
-  ChatViewModel chatViewModel = ChatViewModel();
-  chatViewModel.initGeneratvieModels();
+  store.updateVocabularyStore(excelRepository.readExcel());
+  store.updateApiKeyStore(await secureStorageRepository.readAPI());
+  store.updateModelNameStore(await sharedPreferencesRepository.readModelName());
 
   VocabularyViewmodel vocabularyViewmodel = VocabularyViewmodel(
     store: store,
     excelRepository: excelRepository,
   );
 
-  store.updateVocabularyStore(excelRepository.readExcel());
-  store.updateApiKeyStore(await secureStorageRepository.readAPI());
-  store.updateModelNameStore(await sharedPreferencesRepository.readModelName());
-
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: store),
-        Provider.value(value: excelRepository),
-        Provider.value(value: chatViewModel),
-        Provider.value(value: vocabularyViewmodel),
-      ],
-      child: const MainApp(),
-    ),
+  ChatViewModel chatViewModel = ChatViewModel(
+    store: store,
+    vocabularyViewmodel: vocabularyViewmodel,
   );
+  chatViewModel.initGenerativeModels();
+
+  //test
+  store.updateApiKeyStore('AIzaSyDYPZi5gXCgRnVju9kMC2s5atwXMpOaLpE');
+  store.updateModelNameStore('gemma-4-31b-it');
+  store.updateVocabularyStore([
+    Vocab(
+      id: '',
+      word: 'recession',
+      mean: '經濟衰退',
+      level: Level.red,
+      memoryState: MemoryState.redLow,
+      cooldown: 0,
+    ),
+    Vocab(
+      id: '',
+      word: 'finance',
+      mean: '經濟',
+      level: Level.green,
+      memoryState: MemoryState.green,
+      cooldown: 0,
+    ),
+  ]);
+  chatViewModel.initGenerativeModels();
+  await chatViewModel.generateQuestion();
+
+  print('running userResponse method');
+  await chatViewModel.userResponse(Option(label: 'A', word: 'recession'), []);
+
+  // runApp(
+  //   MultiProvider(
+  //     providers: [
+  //       ChangeNotifierProvider.value(value: store),
+  //       Provider.value(value: excelRepository),
+  //       Provider.value(value: chatViewModel),
+  //       Provider.value(value: vocabularyViewmodel),
+  //     ],
+  //     child: const MainApp(),
+  //   ),
+  // );
 }
 
 class MainApp extends StatefulWidget {
