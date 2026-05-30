@@ -8,6 +8,7 @@ import 'package:toeic_coach/chat/prompt_setter.dart';
 import 'package:toeic_coach/chat/question_vocab_filter.dart';
 import 'package:toeic_coach/models/option.dart';
 import 'package:toeic_coach/models/vocab.dart';
+import 'package:toeic_coach/models/vocabAdjustment.dart';
 import 'package:toeic_coach/store/app_store.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 
@@ -69,15 +70,23 @@ class ChatViewModel with ChangeNotifier {
     print('---reviewUserAnswer---');
     print(response.text);
 
-    final functionCallsResponse = await _geminiRepository.updateMemoryState(
-      _history,
-    );
+    final List<VocabAdjustment?> functionCallsResponse = await _geminiRepository
+        .updateMemoryState(_history);
 
     print('---function call---');
-    for (FunctionCall functionCall in functionCallsResponse) {
-      print('${functionCall.name}: ${functionCall.args.toString()}');
+    for (VocabAdjustment? functionCall in functionCallsResponse) {
+      print('${functionCall}: ${functionCall.toString()}');
     }
 
+    print('---Processing function call---');
+    for (VocabAdjustment? vocabAdjustment in functionCallsResponse) {
+      if (vocabAdjustment != null) {
+        print(
+          '${vocabAdjustment.word}, ${vocabAdjustment.mean}, ${vocabAdjustment.adjustment}',
+        );
+        _vocabularyViewModel.handleVocabAdjustment(vocabAdjustment);
+      }
+    }
     //TODO: update UI and Vocab
   }
 }

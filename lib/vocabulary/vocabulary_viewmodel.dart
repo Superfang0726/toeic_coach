@@ -1,7 +1,9 @@
 import 'package:toeic_coach/models/vocab.dart';
+import 'package:toeic_coach/models/vocabAdjustment.dart';
 import 'package:toeic_coach/store/app_store.dart';
 import 'vocab_domain.dart';
 import 'excel_repository.dart';
+import 'vocab_domain.dart';
 
 class VocabularyViewmodel {
   Store store;
@@ -55,6 +57,7 @@ class VocabularyViewmodel {
     excelRepository.writeExcel(currentVocabs);
   }
 
+  //TODO: Change this into updateVocabByUI
   void updateVocab(Vocab updatedVocab) {
     final currentVocabs = store.vocabulary;
     final int index = currentVocabs.indexWhere(
@@ -65,5 +68,49 @@ class VocabularyViewmodel {
     //write in
     store.updateVocabularyStore(currentVocabs);
     excelRepository.writeExcel(currentVocabs);
+  }
+
+  void applyVocabAdjustment(VocabAdjustment vocabAdjustment) {
+    List<Vocab> currentVocabs = store.vocabulary;
+    int index = currentVocabs.indexWhere(
+      (vocab) => vocab.word == vocabAdjustment.word,
+    );
+
+    print('---index---');
+    print(index);
+
+    currentVocabs[index].mean = vocabAdjustment.mean;
+
+    if (vocabAdjustment.adjustment == Adjustment.upgrade) {
+      currentVocabs[index].memoryState = VocabDomain.upgrade(
+        currentVocabs[index].memoryState,
+      );
+    } else {
+      //adjustment == Adjustment.downgrade
+      currentVocabs[index].memoryState = VocabDomain.downgrade(
+        currentVocabs[index].memoryState,
+      );
+    }
+
+    currentVocabs[index].level = VocabDomain.inferLevel(
+      currentVocabs[index].memoryState,
+    );
+
+    //write in
+    print('excel write in sucessfully');
+    store.updateVocabularyStore(currentVocabs);
+    excelRepository.writeExcel(currentVocabs);
+  }
+
+  void handleVocabAdjustment(VocabAdjustment vocabAdjustment) {
+    if (VocabDomain.checkVocabExist(store.vocabulary, vocabAdjustment.word)) {
+      applyVocabAdjustment(vocabAdjustment);
+    } else {
+      addVocab(
+        word: vocabAdjustment.word,
+        mean: vocabAdjustment.mean,
+        level: Level.red,
+      );
+    }
   }
 }

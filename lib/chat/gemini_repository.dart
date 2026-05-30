@@ -1,5 +1,6 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:toeic_coach/models/vocab.dart';
+import 'package:toeic_coach/models/vocabAdjustment.dart';
 
 class GeminiRepository {
   GenerativeModel? _generateQuestionModel;
@@ -140,13 +141,26 @@ class GeminiRepository {
     return (result, session.history.toList());
   }
 
-  Future<List<FunctionCall>> updateMemoryState(List<Content> history) async {
+  Future<List<VocabAdjustment?>> updateMemoryState(
+    List<Content> history,
+  ) async {
     ChatSession session = _updateMemoryStateModel!.startChat(history: history);
     final result = await session.sendMessage(
       Content.text(
         'Use the update function to downgrade those vocabulary that user answered wrong or unfamiliar and upgrade those vocabulary that user answer correct. ',
       ),
     );
-    return (result.functionCalls.toList());
+
+    return result.functionCalls.expand((call) {
+      final updates = call.args['updates'] as List;
+      return updates.map((entry) {
+        final map = entry as Map;
+        return VocabAdjustment(
+          word: map['word'].toString(),
+          mean: map['mean'].toString(),
+          adjustment: Adjustment.values.byName(map['adjustment'].toString()),
+        );
+      });
+    }).toList();
   }
 }
