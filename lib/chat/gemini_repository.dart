@@ -1,5 +1,4 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/models/vocabAdjustment.dart';
 
 class GeminiRepository {

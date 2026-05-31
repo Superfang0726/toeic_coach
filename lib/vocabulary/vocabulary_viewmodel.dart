@@ -21,8 +21,9 @@ class VocabularyViewmodel {
     final currentVocabs = store.vocabulary;
 
     //alert user the vocab has existed and stop adding new vocab
-    if (VocabDomain.checkVocabExist(currentVocabs, word))
+    if (VocabDomain.checkVocabExist(currentVocabs, word)) {
       return; //TODO: alert user
+    }
 
     String id = VocabDomain.generateUuid();
     MemoryState memoryState = VocabDomain.getDefaultMemoryState(level);

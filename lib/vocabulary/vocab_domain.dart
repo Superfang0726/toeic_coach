@@ -1,5 +1,4 @@
 import 'package:toeic_coach/models/vocab.dart';
-import 'package:toeic_coach/models/vocabAdjustment.dart';
 import 'package:uuid/uuid.dart';
 
 class VocabDomain {

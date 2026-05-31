@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -13,21 +11,17 @@ import 'package:toeic_coach/store/app_store.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 
 class ChatViewModel with ChangeNotifier {
-  Store _store;
-  VocabularyViewmodel _vocabularyViewModel;
+  final Store _store;
+  final VocabularyViewmodel _vocabularyViewModel;
   List<Content> _history = [];
-
-  ChatSession? _generateQuestionSession;
-  ChatSession? _reviewUserAnswerSession;
 
   final GeminiRepository _geminiRepository = GeminiRepository();
 
   //constructor
   ChatViewModel({
-    required Store store,
+    required this._store,
     required VocabularyViewmodel vocabularyViewmodel,
-  }) : _store = store,
-       _vocabularyViewModel = vocabularyViewmodel;
+  }) : _vocabularyViewModel = vocabularyViewmodel;
 
   // UI 狀態
   // ...

@@ -45,8 +45,9 @@ class ExcelRepository {
       );
       int cooldown = (row[5]?.value as IntCellValue?)?.value ?? 0;
 
-      if (id == null || word == null || mean == null)
+      if (id == null || word == null || mean == null) {
         continue; //TODO: delete the data which is broken.
+      }
 
       vocabulary.add(
         Vocab(
