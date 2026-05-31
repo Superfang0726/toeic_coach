@@ -5,6 +5,7 @@ import 'package:toeic_coach/chat/gemini_repository.dart';
 import 'package:toeic_coach/models/option.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/settings/secure_storage_repository.dart';
+import 'package:toeic_coach/settings/settings_UI.dart';
 import 'package:toeic_coach/settings/shared_preferences_repository.dart';
 import 'package:toeic_coach/vocabulary/database_UI.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
@@ -31,12 +32,14 @@ void main() async {
 
   ChatViewModel chatViewModel = ChatViewModel(
     store: store,
-    vocabularyViewmodel: vocabularyViewmodel,
+    vocabularyViewModel: vocabularyViewmodel,
   );
 
-  //test
-  store.updateApiKeyStore('AIzaSyDYPZi5gXCgRnVju9kMC2s5atwXMpOaLpE');
-  store.updateModelNameStore('gemma-4-31b-it');
+  ///
+  ///TEST
+  ///
+  // store.updateApiKeyStore('AIzaSyDYPZi5gXCgRnVju9kMC2s5atwXMpOaLpE');
+  // store.updateModelNameStore('gemma-4-31b-it');
   // store.updateVocabularyStore([
   //   Vocab(
   //     id: '',
@@ -55,23 +58,23 @@ void main() async {
   //     cooldown: 0,
   //   ),
   // ]);
-  chatViewModel.initGenerativeModels();
-  await chatViewModel.generateQuestion();
+  // chatViewModel.initGenerativeModels();
+  // await chatViewModel.generateQuestion();
 
-  print('running userResponse method');
-  await chatViewModel.userResponse(Option(label: 'A', word: 'recession'), []);
+  // print('running userResponse method');
+  // await chatViewModel.userResponse(Option(label: 'A', word: 'recession'), []);
 
-  // runApp(
-  //   MultiProvider(
-  //     providers: [
-  //       ChangeNotifierProvider.value(value: store),
-  //       Provider.value(value: excelRepository),
-  //       Provider.value(value: chatViewModel),
-  //       Provider.value(value: vocabularyViewmodel),
-  //     ],
-  //     child: const MainApp(),
-  //   ),
-  // );
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: store),
+        Provider.value(value: excelRepository),
+        // Provider.value(value: chatViewModel),
+        Provider.value(value: vocabularyViewmodel),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatefulWidget {
@@ -87,7 +90,25 @@ class MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
+        appBar: AppBar(
+          title: Text('TOIEC Coach'),
+          actions: [
+            Builder(
+              builder: (context) => Padding(
+                padding: EdgeInsetsGeometry.all(10),
+                child: IconButton(
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) => SettingsUi(),
+                  ),
+                  icon: Icon(Icons.settings),
+                ),
+              ),
+            ),
+          ],
+        ),
         body: Row(
           children: [
             Expanded(child: Placeholder()),
