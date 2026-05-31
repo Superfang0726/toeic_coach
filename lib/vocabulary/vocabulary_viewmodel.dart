@@ -3,7 +3,6 @@ import 'package:toeic_coach/models/vocabAdjustment.dart';
 import 'package:toeic_coach/store/app_store.dart';
 import 'vocab_domain.dart';
 import 'excel_repository.dart';
-import 'vocab_domain.dart';
 
 class VocabularyViewmodel {
   Store store;

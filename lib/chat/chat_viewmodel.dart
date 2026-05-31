@@ -18,10 +18,7 @@ class ChatViewModel with ChangeNotifier {
   final GeminiRepository _geminiRepository = GeminiRepository();
 
   //constructor
-  ChatViewModel({
-    required this._store,
-    required VocabularyViewmodel vocabularyViewmodel,
-  }) : _vocabularyViewModel = vocabularyViewmodel;
+  ChatViewModel({required this._store, required this._vocabularyViewModel});
 
   // UI 狀態
   // ...
