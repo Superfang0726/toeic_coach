@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/store/app_store.dart';
-import 'package:toeic_coach/vocabulary/excel_repository.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 
 class DatabaseUi extends StatefulWidget {
@@ -21,19 +20,9 @@ class DatabaseUi extends StatefulWidget {
 }
 
 class _DatabaseUiState extends State<DatabaseUi> {
-  late VocabularyViewmodel _vocabularyViewmodel;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _meanController = TextEditingController();
   Level _selectedLevel = Level.red;
-
-  @override
-  void initState() {
-    super.initState();
-    _vocabularyViewmodel = VocabularyViewmodel(
-      store: context.read<Store>(),
-      excelRepository: context.read<ExcelRepository>(),
-    );
-  }
 
   @override
   void dispose() {
@@ -87,7 +76,7 @@ class _DatabaseUiState extends State<DatabaseUi> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        _vocabularyViewmodel.addVocab(
+                        context.read<VocabularyViewmodel>().addVocab(
                           word: _nameController.text,
                           mean: _meanController.text,
                           level: _selectedLevel,
@@ -107,8 +96,9 @@ class _DatabaseUiState extends State<DatabaseUi> {
                     itemBuilder: (context, index) {
                       return VocabListItem(
                         vocab: vocabs[index],
-                        onDelete: () =>
-                            _vocabularyViewmodel.deleteVocab(vocabs[index]),
+                        onDelete: () => context
+                            .read<VocabularyViewmodel>()
+                            .deleteVocab(vocabs[index]),
                       );
                     },
                   ),
