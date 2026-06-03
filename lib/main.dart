@@ -5,7 +5,7 @@ import 'package:toeic_coach/chat/gemini_repository.dart';
 import 'package:toeic_coach/models/option.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/settings/secure_storage_repository.dart';
-import 'package:toeic_coach/settings/settings_UI.dart';
+import 'package:toeic_coach/settings/settings_ui.dart';
 import 'package:toeic_coach/settings/shared_preferences_repository.dart';
 import 'package:toeic_coach/vocabulary/database_UI.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';

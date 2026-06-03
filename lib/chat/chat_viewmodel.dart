@@ -9,11 +9,13 @@ import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/models/vocabAdjustment.dart';
 import 'package:toeic_coach/store/app_store.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
+import 'package:toeic_coach/models/chat_state.dart';
 
 class ChatViewModel with ChangeNotifier {
   final Store _store;
   final VocabularyViewmodel _vocabularyViewModel;
   List<Content> _history = [];
+  late ChatState chatState;
 
   final GeminiRepository _geminiRepository = GeminiRepository();
 
@@ -84,4 +86,6 @@ class ChatViewModel with ChangeNotifier {
     }
     //TODO: update UI and Vocab
   }
+
+  void startQuestion() {}
 }
