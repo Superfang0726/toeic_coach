@@ -113,10 +113,22 @@ ThemeData light() => ThemeData(
 
 ### Right Panel: Vocabulary Database (DatabaseUi)
 
+**Panel Frame** *(user request, 2026-06-06)*
+
+- Wrap the entire right panel in a framed container so it visually mirrors the
+  left chat pane: `kSurface` background, `borderRadius: 16`, 1px `kBorder`
+  outline. The panel should read as its own bordered card, not a borderless
+  region bleeding into the background.
+
 **Input Area**
 
 - Wrap in a `Card` (`elevation: 2`, `borderRadius: 16`)
 - `TextField`: use `OutlineInputBorder` with `borderRadius: 12` and `borderColor: kBorder`
+- The **word** and **mean** fields must each have their **own** outlined box
+  (separate `OutlineInputBorder`), so the user can clearly tell the two inputs
+  apart rather than seeing them as one undivided strip *(user request,
+  2026-06-06)*. Give each a `labelText` / `hintText` ("Word" / "Meaning") and
+  spacing between them.
 - On focus: border changes to `kPrimary`
 - Level selector: replace with three `ChoiceChip`s (🔴 Red / 🟡 Yellow / 🟢 Green); selected chip background uses a tinted version of the corresponding color
 - Add button: `FilledButton`, background `kPrimary`, `borderRadius: 12`, white text
@@ -139,6 +151,20 @@ ThemeData light() => ThemeData(
 ---
 
 ### Left Panel: Chat Area (ChatUi)
+
+**Scrollable layout — overflow fix** *(user request, 2026-06-06)*
+
+The `displayingQuestion` and `displayingReview` columns currently use a fixed
+`Column` + `Spacer()` to pin the action button to the bottom. When the window
+is shrunk (or the review text is long), the fixed-height content exceeds the
+available height and Flutter throws a `RenderFlex overflow` (yellow/black
+"BOTTOM OVERFLOWED BY N PIXELS" bar).
+
+Fix: restructure both views so the **content area scrolls** and the action
+button stays pinned at the bottom — `Expanded(child: SingleChildScrollView(...))`
+for the content, the button below it, and **remove the `Spacer()`** (a `Spacer`
+cannot live inside a scroll view). This removes the overflow at any window size.
+Apply as part of Step 5 (question) and Step 6 (review).
 
 **Shared Card Style**
 

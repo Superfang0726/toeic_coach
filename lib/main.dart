@@ -4,6 +4,7 @@ import 'package:toeic_coach/chat/chat_ui.dart';
 import 'package:toeic_coach/settings/secure_storage_repository.dart';
 import 'package:toeic_coach/settings/settings_ui.dart';
 import 'package:toeic_coach/settings/shared_preferences_repository.dart';
+import 'package:toeic_coach/theme/app_theme.dart';
 import 'package:toeic_coach/vocabulary/database_ui.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 import 'store/app_store.dart';
@@ -83,9 +84,14 @@ class MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('TOIEC Coach'),
+          title: Text('TOEIC Coach'),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(height: 1, color: kBorder),
+          ),
           actions: [
             Builder(
               builder: (context) => Padding(
@@ -95,7 +101,7 @@ class MainAppState extends State<MainApp> {
                     context: context,
                     builder: (context) => SettingsUi(),
                   ),
-                  icon: Icon(Icons.settings),
+                  icon: Icon(Icons.settings_outlined, color: kTextSecondary),
                 ),
               ),
             ),
@@ -104,6 +110,7 @@ class MainAppState extends State<MainApp> {
         body: Row(
           children: [
             Expanded(child: ChatUi()),
+            const VerticalDivider(width: 1, color: kBorder),
             _isDatabaseUiVisible
                 ? Expanded(
                     child: DatabaseUi(

@@ -27,6 +27,18 @@ const Color kTextHint = Color(0xFFCBD5E1);
 // Border / Divider
 const Color kBorder = Color(0xFFE2E8F0);
 
+// Memory-state dot gradient — 6 steps from low (red) to high (green).
+// Indexed by MemoryState.index: redLow, redMedium, redHigh, yellowLow,
+// yellowHigh, green.
+const List<Color> kMemoryStateGradient = [
+  Color(0xFFEF4444), // redLow     — kError
+  Color(0xFFF97316), // redMedium  — orange
+  Color(0xFFF59E0B), // redHigh    — kWarning
+  Color(0xFFEAB308), // yellowLow  — amber
+  Color(0xFF84CC16), // yellowHigh — lime
+  Color(0xFF22C55E), // green      — kSuccess
+];
+
 // ---------------------------------------------------------------------------
 // Global theme
 // ---------------------------------------------------------------------------
