@@ -1,5 +1,5 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:toeic_coach/models/vocabAdjustment.dart';
+import 'package:toeic_coach/models/vocab_adjustment.dart';
 
 class GeminiRepository {
   GenerativeModel? _generateQuestionModel;
@@ -49,13 +49,14 @@ class GeminiRepository {
         responseSchema: Schema.object(
           properties: {
             'result': Schema.string(
-              description: "Output if user's answer is correct or not",
+              description:
+                  "Output if user's answer is correct or not, don't explain why",
               nullable: false,
             ),
             'review': Schema.array(
               items: Schema.string(
                 description:
-                    'Provide meanings about the vocabulary user is unfamiliar or answer wrong',
+                    "Provide meanings about the vocabulary user is unfamiliar or answer wrong, and explain why the answer is wrong",
                 nullable: true,
               ),
             ),
@@ -91,7 +92,7 @@ class GeminiRepository {
                         ),
                         'mean': Schema.string(
                           description:
-                              'The means of the word in the sentence or another in traditional chinese',
+                              'The meaning of the wrong answer or unfamiliar word in traditional chinese',
                           nullable: false,
                         ),
                         'adjustment': Schema.enumString(

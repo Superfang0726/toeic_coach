@@ -40,7 +40,7 @@ class _DatabaseUiState extends State<DatabaseUi> {
         onPressed: () => setState(() {
           widget.onToggle(true);
         }),
-        icon: Icon(Icons.chevron_right),
+        icon: Icon(Icons.chevron_left),
       );
     }
     return LayoutBuilder(

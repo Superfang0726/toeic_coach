@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 class SettingsUi extends StatefulWidget {
   //constructor
-  SettingsUi({super.key});
+  const SettingsUi({super.key});
 
   @override
   State<SettingsUi> createState() => _SettingsUiState();

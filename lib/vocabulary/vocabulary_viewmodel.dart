@@ -1,5 +1,5 @@
 import 'package:toeic_coach/models/vocab.dart';
-import 'package:toeic_coach/models/vocabAdjustment.dart';
+import 'package:toeic_coach/models/vocab_adjustment.dart';
 import 'package:toeic_coach/store/app_store.dart';
 import 'vocab_domain.dart';
 import 'excel_repository.dart';

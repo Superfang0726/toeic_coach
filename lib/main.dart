@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:toeic_coach/chat/chat_ui.dart';
 import 'package:toeic_coach/chat/chat_viewmodel.dart';
 import 'package:toeic_coach/chat/gemini_repository.dart';
 import 'package:toeic_coach/models/option.dart';
@@ -7,7 +8,7 @@ import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/settings/secure_storage_repository.dart';
 import 'package:toeic_coach/settings/settings_ui.dart';
 import 'package:toeic_coach/settings/shared_preferences_repository.dart';
-import 'package:toeic_coach/vocabulary/database_UI.dart';
+import 'package:toeic_coach/vocabulary/database_ui.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 import 'store/app_store.dart';
 import 'vocabulary/excel_repository.dart';
@@ -28,11 +29,6 @@ void main() async {
   VocabularyViewmodel vocabularyViewmodel = VocabularyViewmodel(
     store: store,
     excelRepository: excelRepository,
-  );
-
-  ChatViewModel chatViewModel = ChatViewModel(
-    store: store,
-    vocabularyViewModel: vocabularyViewmodel,
   );
 
   ///
@@ -111,7 +107,7 @@ class MainAppState extends State<MainApp> {
         ),
         body: Row(
           children: [
-            Expanded(child: Placeholder()),
+            Expanded(child: ChatUi()),
             _isDatabaseUiVisible
                 ? Expanded(
                     child: DatabaseUi(
