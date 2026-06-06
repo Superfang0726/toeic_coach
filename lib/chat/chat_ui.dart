@@ -123,10 +123,7 @@ class _ChatUiState extends State<ChatUi> {
       listenable: _chatViewModel,
       builder: (context, _) {
         if (_chatViewModel.chatState == ChatState.generatingQuestion) {
-          return Container(
-            alignment: AlignmentGeometry.center,
-            child: Text('Generating Question'),
-          );
+          return const _ChatLoading(label: 'Generating question…');
         } else if (_chatViewModel.chatState == ChatState.displayingQuestion) {
           final bool hasSelection = _chatViewModel.selectedOption != null;
           return Padding(
@@ -197,10 +194,7 @@ class _ChatUiState extends State<ChatUi> {
             ),
           );
         } else if (_chatViewModel.chatState == ChatState.generatingReview) {
-          return Container(
-            alignment: AlignmentGeometry.center,
-            child: Text('Generating review'),
-          );
+          return const _ChatLoading(label: 'Reviewing…');
         } else if (_chatViewModel.chatState == ChatState.displayingReview) {
           final String result = _chatViewModel.result ?? '';
           // Prefer the model's structured flag; fall back to the wrong-answer
@@ -295,6 +289,35 @@ class _ChatUiState extends State<ChatUi> {
         }
         return Placeholder();
       },
+    );
+  }
+}
+
+/// Centered loading view for the generating states.
+class _ChatLoading extends StatelessWidget {
+  final String label;
+
+  const _ChatLoading({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: _ChatCard(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: kPrimary),
+              const SizedBox(height: 16),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 16, color: kTextSecondary),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
