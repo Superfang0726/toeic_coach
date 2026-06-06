@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/store/app_store.dart';
+import 'package:toeic_coach/theme/app_theme.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 
 class DatabaseUi extends StatefulWidget {
@@ -31,93 +32,194 @@ class _DatabaseUiState extends State<DatabaseUi> {
     super.dispose();
   }
 
+  // Outlined input box for the word / mean fields. Each field gets its own
+  // border so the two inputs read as clearly separate boxes.
+  InputDecoration _inputDecoration(String label) {
+    OutlineInputBorder border(Color color, double width) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: color, width: width),
+    );
+    return InputDecoration(
+      labelText: label,
+      isDense: true,
+      filled: true,
+      fillColor: kSurface,
+      labelStyle: const TextStyle(color: kTextSecondary),
+      border: border(kBorder, 1),
+      enabledBorder: border(kBorder, 1),
+      focusedBorder: border(kPrimary, 2),
+    );
+  }
+
+  // A ChoiceChip for the level selector, tinted with the level's own color
+  // when selected.
+  Widget _levelChip(Level level, String label, Color color) {
+    final bool selected = _selectedLevel == level;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      showCheckmark: false,
+      backgroundColor: kSurface,
+      selectedColor: color.withValues(alpha: 0.15),
+      side: BorderSide(color: selected ? color : kBorder),
+      labelStyle: TextStyle(
+        color: selected ? kTextPrimary : kTextSecondary,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+      ),
+      onSelected: (_) => setState(() => _selectedLevel = level),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Vocab> vocabs = context.watch<Store>().vocabulary;
 
+    // Collapsed rail: a small FAB to expand the panel.
     if (!widget.isVisible) {
-      return IconButton(
-        onPressed: () => setState(() {
-          widget.onToggle(true);
-        }),
-        icon: Icon(Icons.chevron_left),
+      return Center(
+        child: FloatingActionButton.small(
+          heroTag: 'expandDatabase',
+          backgroundColor: kPrimary,
+          foregroundColor: Colors.white,
+          onPressed: () => widget.onToggle(true),
+          child: const Icon(Icons.chevron_left),
+        ),
       );
     }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final height = constraints.maxHeight;
-        return Stack(
-          children: [
-            Column(
-              children: [
-                //This Row is where user enter a word
-                Row(
-                  children: [
-                    Expanded(child: TextField(controller: _nameController)),
-                    Expanded(child: TextField(controller: _meanController)),
-                    DropdownButton<Level>(
-                      value: _selectedLevel,
-                      items: [
-                        DropdownMenuItem(value: Level.red, child: Text('Red')),
-                        DropdownMenuItem(
-                          value: Level.yellow,
-                          child: Text('Yellow'),
-                        ),
-                        DropdownMenuItem(
-                          value: Level.green,
-                          child: Text('Green'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _selectedLevel = value);
-                        }
-                      },
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<VocabularyViewmodel>().addVocab(
-                          word: _nameController.text,
-                          mean: _meanController.text,
-                          level: _selectedLevel,
-                        );
-                        _nameController.clear();
-                        _meanController.clear();
-                      },
-                      child: Icon(Icons.add),
-                    ),
-                  ],
-                ),
 
-                //This is where vocabs list at
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: vocabs.length,
-                    itemBuilder: (context, index) {
-                      return VocabListItem(
-                        vocab: vocabs[index],
-                        onDelete: () => context
-                            .read<VocabularyViewmodel>()
-                            .deleteVocab(vocabs[index]),
-                      );
-                    },
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      // Panel frame — mirrors the left chat pane: surface fill, rounded
+      // corners, 1px border.
+      child: Container(
+        decoration: BoxDecoration(
+          color: kSurface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: kBorder),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Input area card.
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Word + mean: two separately outlined boxes.
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _nameController,
+                                  decoration: _inputDecoration('Word'),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextField(
+                                  controller: _meanController,
+                                  decoration: _inputDecoration('Meaning'),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          // Level chips + add button.
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: [
+                                    _levelChip(Level.red, '🔴 Red', kError),
+                                    _levelChip(
+                                      Level.yellow,
+                                      '🟡 Yellow',
+                                      kWarning,
+                                    ),
+                                    _levelChip(
+                                      Level.green,
+                                      '🟢 Green',
+                                      kSuccess,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              FilledButton.icon(
+                                onPressed: () {
+                                  context.read<VocabularyViewmodel>().addVocab(
+                                    word: _nameController.text,
+                                    mean: _meanController.text,
+                                    level: _selectedLevel,
+                                  );
+                                  _nameController.clear();
+                                  _meanController.clear();
+                                },
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: kPrimary,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.add),
+                                label: const Text('Add'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+
+                  //This is where vocabs list at
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: vocabs.length,
+                      itemBuilder: (context, index) {
+                        return VocabListItem(
+                          vocab: vocabs[index],
+                          onDelete: () => context
+                              .read<VocabularyViewmodel>()
+                              .deleteVocab(vocabs[index]),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             //DatabaseUI fold Button
             Positioned(
-              left: 0,
-              top: height / 2,
-              child: IconButton(
-                onPressed: () => widget.onToggle(false),
-                icon: Icon(Icons.chevron_right),
+              left: 8,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: FloatingActionButton.small(
+                  heroTag: 'collapseDatabase',
+                  backgroundColor: kPrimary,
+                  foregroundColor: Colors.white,
+                  onPressed: () => widget.onToggle(false),
+                  child: const Icon(Icons.chevron_right),
+                ),
               ),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }
@@ -138,18 +240,94 @@ class VocabListItem extends StatefulWidget {
 class _VocabListItemState extends State<VocabListItem> {
   bool _isHovered = false;
 
+  Color get _levelColor {
+    switch (widget.vocab.level) {
+      case Level.red:
+        return kError;
+      case Level.yellow:
+        return kWarning;
+      case Level.green:
+        return kSuccess;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: Row(
-        children: [
-          Text(widget.vocab.word),
-          Text(widget.vocab.mean),
-          if (_isHovered)
-            IconButton(icon: Icon(Icons.delete), onPressed: widget.onDelete),
-        ],
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: _isHovered ? kPrimaryLight : kSurface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // Left 4px color strip based on level.
+              Container(width: 4, color: _levelColor),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.vocab.word,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: kTextPrimary,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          widget.vocab.mean,
+                          style: const TextStyle(color: kTextSecondary),
+                        ),
+                      ),
+                      // Right-side memory-state dot (gradient low -> high).
+                      Container(
+                        width: 10,
+                        height: 10,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: kMemoryStateGradient[widget
+                              .vocab
+                              .memoryState
+                              .index],
+                        ),
+                      ),
+                      // Reserve width so the row doesn't jump on hover.
+                      SizedBox(
+                        width: 40,
+                        child: _isHovered
+                            ? IconButton(
+                                icon: const Icon(Icons.delete, color: kError),
+                                onPressed: widget.onDelete,
+                              )
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
