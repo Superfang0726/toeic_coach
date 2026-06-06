@@ -52,8 +52,6 @@ class ChatViewModel with ChangeNotifier {
   }
 
   Future<String> _generateQuestion() async {
-    print('Generating question');
-
     List<Vocab> filteredVocabulary = QuestionVocabFilter.filter(
       _store.vocabulary,
     );

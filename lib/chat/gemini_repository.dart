@@ -118,8 +118,6 @@ class GeminiRepository {
         ),
       ),
     );
-
-    print('---init---');
   }
 
   Future<(GenerateContentResponse, List<Content>)> generateQuestion(

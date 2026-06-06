@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toeic_coach/chat/chat_viewmodel.dart';
@@ -197,18 +196,12 @@ class _ChatUiState extends State<ChatUi> {
                               style: TextStyle(fontSize: 20),
                             ),
                             Text('檢討', style: TextStyle(fontSize: 30)),
-                            ...(_chatViewModel.reviewItems)
-                                .map(
-                                  (e) => Text(
-                                    e ?? '',
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                )
-                                .toList(),
+                            ...(_chatViewModel.reviewItems).map(
+                              (e) => Text(e, style: TextStyle(fontSize: 20)),
+                            ),
                             Text('記憶狀態調整', style: TextStyle(fontSize: 30)),
                             ...(_chatViewModel.memoryStateAdjustment).map(
-                              (e) =>
-                                  Text(e ?? '', style: TextStyle(fontSize: 20)),
+                              (e) => Text(e, style: TextStyle(fontSize: 20)),
                             ),
                           ],
                         ),

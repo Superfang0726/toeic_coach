@@ -22,7 +22,6 @@ class VocabDomain {
   }
 
   static MemoryState upgrade(MemoryState currentMemoryState) {
-    print(currentMemoryState);
     switch (currentMemoryState) {
       case MemoryState.redLow:
         return MemoryState.redMedium;

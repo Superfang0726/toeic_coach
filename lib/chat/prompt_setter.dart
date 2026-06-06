@@ -36,16 +36,16 @@ Workflow:
     }
 
     buffer.writeln("""
-Goal: Evaluate my answer, tell user if the answer is correct or not in traditional chinese. Besides, if my answer is wrong or I provide some vocabulary I am unfamiliar, choose some of it to use updateVocab tool.
+Goal: Evaluate my answer, tell user if the answer is correct or not in traditional chinese. Besides, if my answer is wrong or I provide some vocabulary I am unfamiliar, choose some of it to use updateMemoryState tool.
 Workflow: 
 1. Evaluate the answer based on chat history.
-2. If the answer is correct, tell user the answer provided is correct, and upgrade memoryState by using updateVocab tool; if not, tell user which option is correct and why user's choice is wrong, and downgrade the memoryState by using updateVocab tool.
+2. If the answer is correct, tell user the answer provided is correct, and upgrade memoryState by using updateMemoryState tool; if not, tell user which option is correct and why user's choice is wrong, and downgrade the memoryState by using updateMemoryState tool.
 """);
 
     if (unfamiliarWords.isNotEmpty) {
       buffer.writeln("""
 3. Tell user the mean of the unfamiliar vocabulary in the sentence.
-4. Downgrade the unfamiliar vocabulary by using updateVocab tool depends on how common it is. If it appear in TOEIC test usually or has enough confusion, downgrade it.
+4. Downgrade the unfamiliar vocabulary by using updateMemoryState tool depends on how common it is. If it appear in TOEIC test usually or has enough confusion, downgrade it.
 """);
     }
 

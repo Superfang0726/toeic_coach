@@ -76,9 +76,6 @@ class VocabularyViewmodel {
       (vocab) => vocab.word == vocabAdjustment.word,
     );
 
-    print('---index---');
-    print(index);
-
     currentVocabs[index].mean = vocabAdjustment.mean;
 
     if (vocabAdjustment.adjustment == Adjustment.upgrade) {
@@ -97,7 +94,6 @@ class VocabularyViewmodel {
     );
 
     //write in
-    print('excel write in sucessfully');
     store.updateVocabularyStore(currentVocabs);
     excelRepository.writeExcel(currentVocabs);
   }
