@@ -23,6 +23,7 @@ class ChatViewModel with ChangeNotifier {
   late List<Option> _options;
   Option? _selectedOption;
   String? _result;
+  bool? _isCorrect;
   List<String> _reviewItems = [];
   List<String> _memoryStateUpdateResult = [];
 
@@ -31,6 +32,7 @@ class ChatViewModel with ChangeNotifier {
   List<Option> get options => _options;
   Option? get selectedOption => _selectedOption;
   String? get result => _result;
+  bool? get isCorrect => _isCorrect;
   List<String> get reviewItems => _reviewItems;
   List<String> get memoryStateAdjustment => _memoryStateUpdateResult;
 
@@ -124,6 +126,7 @@ class ChatViewModel with ChangeNotifier {
     );
     final map = jsonDecode(modelResponse!);
     _result = map['result'] as String;
+    _isCorrect = map['isCorrect'] as bool?;
     _reviewItems = (map['review'] as List).map((e) => e as String).toList();
     _memoryStateUpdateResult = (map['memoryStateUpdateResult'] as List)
         .map((e) => e as String)

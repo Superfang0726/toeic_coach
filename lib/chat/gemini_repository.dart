@@ -53,6 +53,11 @@ class GeminiRepository {
                   "Output if user's answer is correct or not, don't explain why",
               nullable: false,
             ),
+            'isCorrect': Schema.boolean(
+              description:
+                  "true if the user's answer is correct, false otherwise",
+              nullable: false,
+            ),
             'review': Schema.array(
               items: Schema.string(
                 description:
@@ -68,7 +73,7 @@ class GeminiRepository {
               ),
             ),
           },
-          requiredProperties: ['result', 'memoryStateUpdateResult'],
+          requiredProperties: ['result', 'isCorrect', 'memoryStateUpdateResult'],
         ),
       ),
     );
