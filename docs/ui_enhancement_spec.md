@@ -226,6 +226,13 @@ Container(
 - Correct: top color strip `kSuccess`, title icon `Icons.check_circle` (green)
 - Incorrect: top color strip `kError`, title icon `Icons.cancel` (red)
 - Result text: 20sp, `fontWeight: w600`
+- Correctness comes from a structured `isCorrect` boolean on the review schema
+  / `ChatViewModel`, not from parsing the `result` string *(approved scope
+  exception, 2026-06-07)*. This is the one place the "no logic changes" rule was
+  relaxed: a boolean was added to `reviewUserAnswerModel`'s schema and exposed
+  via `ChatViewModel.isCorrect`. The `result` text is kept (it carries the
+  correct answer); the `!result.contains('錯誤')` heuristic remains only as a
+  fallback when the flag is absent.
 
 *Review & memory state adjustment*
 

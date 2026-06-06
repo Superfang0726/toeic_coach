@@ -18,6 +18,7 @@ const Color kPrimaryDark = Color(0xFF1D4ED8); // Button pressed state
 const Color kSuccess = Color(0xFF22C55E); // Green (correct answer)
 const Color kError = Color(0xFFEF4444); // Red (wrong answer)
 const Color kWarning = Color(0xFFF59E0B); // Yellow (unfamiliar word marker)
+const Color kWarningLight = Color(0xFFFFFBEB); // Warm yellow tint (tapped token)
 
 // Text
 const Color kTextPrimary = Color(0xFF1E293B);
