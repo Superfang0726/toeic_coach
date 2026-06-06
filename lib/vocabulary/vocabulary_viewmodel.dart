@@ -1,4 +1,5 @@
 import 'package:toeic_coach/models/vocab.dart';
+import 'package:toeic_coach/models/vocab_adjustment.dart';
 import 'package:toeic_coach/store/app_store.dart';
 import 'vocab_domain.dart';
 import 'excel_repository.dart';
@@ -19,8 +20,9 @@ class VocabularyViewmodel {
     final currentVocabs = store.vocabulary;
 
     //alert user the vocab has existed and stop adding new vocab
-    if (VocabDomain.checkVocabExist(currentVocabs, word))
+    if (VocabDomain.checkVocabExist(currentVocabs, word)) {
       return; //TODO: alert user
+    }
 
     String id = VocabDomain.generateUuid();
     MemoryState memoryState = VocabDomain.getDefaultMemoryState(level);
@@ -36,7 +38,7 @@ class VocabularyViewmodel {
     currentVocabs.add(newVocab);
 
     //write in
-    store.updateStore(currentVocabs);
+    store.updateVocabularyStore(currentVocabs);
     excelRepository.writeExcel(currentVocabs);
   }
 
@@ -51,10 +53,11 @@ class VocabularyViewmodel {
     currentVocabs.removeWhere((vocab) => vocab.word == target.word);
 
     //write in
-    store.updateStore(currentVocabs);
+    store.updateVocabularyStore(currentVocabs);
     excelRepository.writeExcel(currentVocabs);
   }
 
+  //TODO: Change this into updateVocabByUI
   void updateVocab(Vocab updatedVocab) {
     final currentVocabs = store.vocabulary;
     final int index = currentVocabs.indexWhere(
@@ -63,7 +66,51 @@ class VocabularyViewmodel {
     currentVocabs[index] = updatedVocab;
 
     //write in
-    store.updateStore(currentVocabs);
+    store.updateVocabularyStore(currentVocabs);
     excelRepository.writeExcel(currentVocabs);
+  }
+
+  void applyVocabAdjustment(VocabAdjustment vocabAdjustment) {
+    List<Vocab> currentVocabs = store.vocabulary;
+    int index = currentVocabs.indexWhere(
+      (vocab) => vocab.word == vocabAdjustment.word,
+    );
+
+    print('---index---');
+    print(index);
+
+    currentVocabs[index].mean = vocabAdjustment.mean;
+
+    if (vocabAdjustment.adjustment == Adjustment.upgrade) {
+      currentVocabs[index].memoryState = VocabDomain.upgrade(
+        currentVocabs[index].memoryState,
+      );
+    } else {
+      //adjustment == Adjustment.downgrade
+      currentVocabs[index].memoryState = VocabDomain.downgrade(
+        currentVocabs[index].memoryState,
+      );
+    }
+
+    currentVocabs[index].level = VocabDomain.inferLevel(
+      currentVocabs[index].memoryState,
+    );
+
+    //write in
+    print('excel write in sucessfully');
+    store.updateVocabularyStore(currentVocabs);
+    excelRepository.writeExcel(currentVocabs);
+  }
+
+  void handleVocabAdjustment(VocabAdjustment vocabAdjustment) {
+    if (VocabDomain.checkVocabExist(store.vocabulary, vocabAdjustment.word)) {
+      applyVocabAdjustment(vocabAdjustment);
+    } else {
+      addVocab(
+        word: vocabAdjustment.word,
+        mean: vocabAdjustment.mean,
+        level: Level.red,
+      );
+    }
   }
 }
