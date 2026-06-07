@@ -23,16 +23,42 @@ class GeminiRepository {
                   'Generate a sentence with blank as ___ in TOEIC Part 5 pattern',
               nullable: false,
             ),
-            'options': Schema.array(
-              items: Schema.string(
-                description:
-                    'Exactly 4 different options labeled A, B, C, D in "<label>. <word>" pattern',
-                nullable: false,
-              ),
+            'options': Schema.object(
+              properties: {
+                'A': Schema.string(
+                  description:
+                      'A single vocabulary word that is a candidate answer for the blank — '
+                      'grammatically plausible and semantically confusable with the other '
+                      'choices. Just the word.',
+                  nullable: false,
+                ),
+                'B': Schema.string(
+                  description:
+                      'A single vocabulary word that is a candidate answer for the blank — '
+                      'grammatically plausible and semantically confusable with the other '
+                      'choices. Just the word.',
+                  nullable: false,
+                ),
+                'C': Schema.string(
+                  description:
+                      'A single vocabulary word that is a candidate answer for the blank — '
+                      'grammatically plausible and semantically confusable with the other '
+                      'choices. Just the word.',
+                  nullable: false,
+                ),
+                'D': Schema.string(
+                  description:
+                      'A single vocabulary word that is a candidate answer for the blank — '
+                      'grammatically plausible and semantically confusable with the other '
+                      'choices. Just the word.',
+                  nullable: false,
+                ),
+              },
+              requiredProperties: ['A', 'B', 'C', 'D'],
             ),
-            'answer': Schema.string(
-              description:
-                  'The correct answer for the blank in "<label>. <word>" pattern',
+            'answer': Schema.enumString(
+              enumValues: ['A', 'B', 'C', 'D'],
+              description: 'The key of the correct choice for the blank.',
               nullable: false,
             ),
           },

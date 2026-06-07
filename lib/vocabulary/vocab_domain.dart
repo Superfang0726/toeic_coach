@@ -9,7 +9,22 @@ class VocabDomain {
   static String generateUuid() => uuid.v4();
 
   static bool checkVocabExist(List<Vocab> currentVocabs, String word) =>
-      currentVocabs.any((vocab) => vocab.word == word);
+      currentVocabs.any(
+        (vocab) => vocab.word.toLowerCase() == word.toLowerCase(),
+      );
+
+  /// Returns the word using the database's canonical casing when a
+  /// case-insensitive match exists; otherwise returns the word lowercased as
+  /// the display convention for model-invented distractors. Keeps option text
+  /// visually consistent and stops casing drift from creating duplicate words.
+  static String canonicalizeWord(List<Vocab> currentVocabs, String word) {
+    for (final vocab in currentVocabs) {
+      if (vocab.word.toLowerCase() == word.toLowerCase()) {
+        return vocab.word;
+      }
+    }
+    return word.toLowerCase();
+  }
 
   static MemoryState getDefaultMemoryState(Level level) {
     switch (level) {

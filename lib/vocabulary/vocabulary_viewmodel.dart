@@ -72,7 +72,8 @@ class VocabularyViewmodel {
 
   void applyVocabAdjustment(VocabAdjustment vocabAdjustment) {
     int index = store.vocabulary.indexWhere(
-      (vocab) => vocab.word == vocabAdjustment.word,
+      (vocab) =>
+          vocab.word.toLowerCase() == vocabAdjustment.word.toLowerCase(),
     );
 
     Vocab target = store.vocabulary[index];
