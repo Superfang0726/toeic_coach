@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,7 +9,22 @@ class VocabDomain {
   static String generateUuid() => uuid.v4();
 
   static bool checkVocabExist(List<Vocab> currentVocabs, String word) =>
-      currentVocabs.any((vocab) => vocab.word == word);
+      currentVocabs.any(
+        (vocab) => vocab.word.toLowerCase() == word.toLowerCase(),
+      );
+
+  /// Returns the word using the database's canonical casing when a
+  /// case-insensitive match exists; otherwise returns the word lowercased as
+  /// the display convention for model-invented distractors. Keeps option text
+  /// visually consistent and stops casing drift from creating duplicate words.
+  static String canonicalizeWord(List<Vocab> currentVocabs, String word) {
+    for (final vocab in currentVocabs) {
+      if (vocab.word.toLowerCase() == word.toLowerCase()) {
+        return vocab.word;
+      }
+    }
+    return word.toLowerCase();
+  }
 
   static MemoryState getDefaultMemoryState(Level level) {
     switch (level) {
@@ -66,6 +82,22 @@ class VocabDomain {
         return Level.yellow;
       case MemoryState.green:
         return Level.green;
+    }
+  }
+
+  static int inferCooldown(MemoryState memoryState) {
+    switch (memoryState) {
+      case MemoryState.redLow:
+        return 2;
+      case MemoryState.redMedium:
+        return 3;
+      case MemoryState.redHigh:
+        return 5;
+      case MemoryState.yellowLow:
+      case MemoryState.yellowHigh:
+        return 7;
+      case MemoryState.green:
+        return 2;
     }
   }
 }

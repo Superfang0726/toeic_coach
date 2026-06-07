@@ -9,6 +9,7 @@ import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/models/vocab_adjustment.dart';
 import 'package:toeic_coach/store/app_store.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
+import 'package:toeic_coach/vocabulary/vocab_domain.dart';
 import 'package:toeic_coach/models/chat_state.dart';
 
 class ChatViewModel with ChangeNotifier {
@@ -107,9 +108,13 @@ class ChatViewModel with ChangeNotifier {
     final cleanedText = (modelResponse).trim().replaceAll('```', '');
     final map = jsonDecode(cleanedText);
     _sentence = map['sentence'];
-    _options = (map['options'] as List).map((e) {
-      final parts = (e as String).split('. ');
-      return Option(label: parts[0], word: parts[1]);
+    final opts = map['options'] as Map<String, dynamic>;
+    _options = ['A', 'B', 'C', 'D'].map((k) {
+      final word = VocabDomain.canonicalizeWord(
+        _store.vocabulary,
+        opts[k] as String,
+      );
+      return Option(label: k, word: word);
     }).toList();
 
     chatState = ChatState.displayingQuestion;
