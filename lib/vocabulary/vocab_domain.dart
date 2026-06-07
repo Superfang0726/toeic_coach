@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:uuid/uuid.dart';
 
@@ -66,6 +67,22 @@ class VocabDomain {
         return Level.yellow;
       case MemoryState.green:
         return Level.green;
+    }
+  }
+
+  static int inferCooldown(MemoryState memoryState) {
+    switch (memoryState) {
+      case MemoryState.redLow:
+        return 2;
+      case MemoryState.redMedium:
+        return 3;
+      case MemoryState.redHigh:
+        return 5;
+      case MemoryState.yellowLow:
+      case MemoryState.yellowHigh:
+        return 7;
+      case MemoryState.green:
+        return 2;
     }
   }
 }

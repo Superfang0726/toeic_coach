@@ -71,31 +71,28 @@ class VocabularyViewmodel {
   }
 
   void applyVocabAdjustment(VocabAdjustment vocabAdjustment) {
-    List<Vocab> currentVocabs = store.vocabulary;
-    int index = currentVocabs.indexWhere(
+    int index = store.vocabulary.indexWhere(
       (vocab) => vocab.word == vocabAdjustment.word,
     );
 
-    currentVocabs[index].mean = vocabAdjustment.mean;
+    Vocab target = store.vocabulary[index];
 
-    if (vocabAdjustment.adjustment == Adjustment.upgrade) {
-      currentVocabs[index].memoryState = VocabDomain.upgrade(
-        currentVocabs[index].memoryState,
-      );
-    } else {
-      //adjustment == Adjustment.downgrade
-      currentVocabs[index].memoryState = VocabDomain.downgrade(
-        currentVocabs[index].memoryState,
-      );
-    }
+    MemoryState newMemoryState =
+        vocabAdjustment.adjustment == Adjustment.upgrade
+        ? VocabDomain.upgrade(target.memoryState)
+        : VocabDomain.downgrade(target.memoryState);
 
-    currentVocabs[index].level = VocabDomain.inferLevel(
-      currentVocabs[index].memoryState,
+    Vocab updatedVocab = target.copyWith(
+      mean: vocabAdjustment.mean,
+      memoryState: newMemoryState,
+      level: VocabDomain.inferLevel(newMemoryState),
     );
 
-    //write in
-    store.updateVocabularyStore(currentVocabs);
-    excelRepository.writeExcel(currentVocabs);
+    List<Vocab> updatedVocabs = List.from(store.vocabulary);
+    updatedVocabs[index] = updatedVocab;
+
+    store.updateVocabularyStore(updatedVocabs);
+    excelRepository.writeExcel(updatedVocabs);
   }
 
   void handleVocabAdjustment(VocabAdjustment vocabAdjustment) {
