@@ -86,6 +86,7 @@ class VocabularyViewmodel {
       mean: vocabAdjustment.mean,
       memoryState: newMemoryState,
       level: VocabDomain.inferLevel(newMemoryState),
+      cooldown: VocabDomain.inferCooldown(newMemoryState),
     );
 
     List<Vocab> updatedVocabs = List.from(store.vocabulary);
