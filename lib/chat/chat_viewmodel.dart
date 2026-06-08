@@ -4,6 +4,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:toeic_coach/chat/gemini_repository.dart';
 import 'package:toeic_coach/chat/prompt_setter.dart';
 import 'package:toeic_coach/chat/question_vocab_filter.dart';
+import 'package:toeic_coach/chat/retry_handler.dart';
 import 'package:toeic_coach/models/option.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/models/vocab_adjustment.dart';
@@ -19,6 +20,7 @@ class ChatViewModel with ChangeNotifier {
 
   List<String> _unfamiliarWords = [];
   ChatState chatState = ChatState.generatingQuestion;
+  int retryTimes = 0;
 
   late String _sentence;
   late List<Option> _options;
@@ -68,7 +70,7 @@ class ChatViewModel with ChangeNotifier {
     return response.text ?? 'No response got';
   }
 
-  Future<String?> _userResponse(
+  Future<String> _userResponse(
     Option userAnswer,
     List<String> unfamiliarWords,
   ) async {
@@ -88,8 +90,7 @@ class ChatViewModel with ChangeNotifier {
       }
     }
 
-    return response.text;
-    //TODO: update UI and Vocab
+    return response.text ?? 'No response got';
   }
 
   ///
@@ -104,41 +105,60 @@ class ChatViewModel with ChangeNotifier {
     notifyListeners();
 
     //Generate question
-    final String modelResponse = await _generateQuestion();
-    final cleanedText = (modelResponse).trim().replaceAll('```', '');
-    final map = jsonDecode(cleanedText);
-    _sentence = map['sentence'];
-    final opts = map['options'] as Map<String, dynamic>;
-    _options = ['A', 'B', 'C', 'D'].map((k) {
-      final word = VocabDomain.canonicalizeWord(
-        _store.vocabulary,
-        opts[k] as String,
-      );
-      return Option(label: k, word: word);
-    }).toList();
+    final String? modelResponse = await RetryHandler.retryHandler(
+      _generateQuestion,
+      10,
+      onRetry: (currentTimes) {
+        retryTimes = currentTimes;
+        notifyListeners();
+      },
+    );
 
-    chatState = ChatState.displayingQuestion;
-    notifyListeners();
+    if (modelResponse != null) {
+      final cleanedText = modelResponse.trim().replaceAll('```', '');
+      final map = jsonDecode(cleanedText);
+      _sentence = map['sentence'];
+      final opts = map['options'] as Map<String, dynamic>;
+      _options = ['A', 'B', 'C', 'D'].map((k) {
+        final word = VocabDomain.canonicalizeWord(
+          _store.vocabulary,
+          opts[k] as String,
+        );
+        return Option(label: k, word: word);
+      }).toList();
+
+      chatState = ChatState.displayingQuestion;
+      notifyListeners();
+    } else {
+      chatState = ChatState.failToGenerateQuestion;
+      notifyListeners();
+    }
   }
 
   Future<void> submitAnswer() async {
     chatState = ChatState.generatingReview;
     notifyListeners();
 
-    final String? modelResponse = await _userResponse(
-      selectedOption!,
-      unfamiliarWords,
+    final String? modelResponse = await RetryHandler.retryHandler(
+      () => _userResponse(selectedOption!, unfamiliarWords),
+      10,
     );
-    final map = jsonDecode(modelResponse!);
-    _result = map['result'] as String;
-    _isCorrect = map['isCorrect'] as bool?;
-    _reviewItems = (map['review'] as List).map((e) => e as String).toList();
-    _memoryStateUpdateResult = (map['memoryStateUpdateResult'] as List)
-        .map((e) => e as String)
-        .toList();
 
-    chatState = ChatState.displayingReview;
-    notifyListeners();
+    if (modelResponse != null) {
+      final map = jsonDecode(modelResponse);
+      _result = map['result'] as String;
+      _isCorrect = map['isCorrect'] as bool?;
+      _reviewItems = (map['review'] as List).map((e) => e as String).toList();
+      _memoryStateUpdateResult = (map['memoryStateUpdateResult'] as List)
+          .map((e) => e as String)
+          .toList();
+
+      chatState = ChatState.displayingReview;
+      notifyListeners();
+    } else {
+      chatState = ChatState.failToGenerateReview;
+      notifyListeners();
+    }
   }
 
   void toggleUnfamiliarWord(String word) {
