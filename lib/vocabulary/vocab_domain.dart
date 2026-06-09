@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:uuid/uuid.dart';
 

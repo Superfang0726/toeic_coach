@@ -72,8 +72,7 @@ class VocabularyViewmodel {
 
   void applyVocabAdjustment(VocabAdjustment vocabAdjustment) {
     int index = store.vocabulary.indexWhere(
-      (vocab) =>
-          vocab.word.toLowerCase() == vocabAdjustment.word.toLowerCase(),
+      (vocab) => vocab.word.toLowerCase() == vocabAdjustment.word.toLowerCase(),
     );
 
     Vocab target = store.vocabulary[index];
@@ -101,6 +100,7 @@ class VocabularyViewmodel {
     if (VocabDomain.checkVocabExist(store.vocabulary, vocabAdjustment.word)) {
       applyVocabAdjustment(vocabAdjustment);
     } else {
+      //TODO: filter those upgrade adjustment not to add in database
       addVocab(
         word: vocabAdjustment.word,
         mean: vocabAdjustment.mean,
