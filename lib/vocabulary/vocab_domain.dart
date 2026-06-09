@@ -70,6 +70,16 @@ class VocabDomain {
     }
   }
 
+  static List<Vocab> decreaseCooldown(List<Vocab> currentVocabs) {
+    return currentVocabs
+        .map(
+          (vocab) => vocab.cooldown > 0
+              ? vocab.copyWith(cooldown: vocab.cooldown - 1)
+              : vocab,
+        )
+        .toList();
+  }
+
   static Level inferLevel(MemoryState memoryState) {
     switch (memoryState) {
       case MemoryState.redHigh:

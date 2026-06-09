@@ -86,6 +86,8 @@ class ChatViewModel with ChangeNotifier {
     );
     _history = history;
 
+    _vocabularyViewModel.decreaseCooldown();
+
     final List<VocabAdjustment?> functionCallsResponse = await _geminiRepository
         .updateMemoryState(_history);
 

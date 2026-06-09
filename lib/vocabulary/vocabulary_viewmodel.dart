@@ -108,4 +108,12 @@ class VocabularyViewmodel {
       );
     }
   }
+
+  void decreaseCooldown() {
+    List<Vocab> updatedVocab = VocabDomain.decreaseCooldown(store.vocabulary);
+
+    //write in
+    store.updateVocabularyStore(updatedVocab);
+    excelRepository.writeExcel(updatedVocab);
+  }
 }
