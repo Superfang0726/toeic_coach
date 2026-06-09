@@ -28,35 +28,6 @@ void main() async {
     excelRepository: excelRepository,
   );
 
-  ///
-  ///TEST
-  ///
-  // store.updateApiKeyStore('AIzaSyDYPZi5gXCgRnVju9kMC2s5atwXMpOaLpE');
-  // store.updateModelNameStore('gemma-4-31b-it');
-  // store.updateVocabularyStore([
-  //   Vocab(
-  //     id: '',
-  //     word: 'recession',
-  //     mean: '經濟衰退',
-  //     level: Level.red,
-  //     memoryState: MemoryState.redLow,
-  //     cooldown: 0,
-  //   ),
-  //   Vocab(
-  //     id: '',
-  //     word: 'finance',
-  //     mean: '經濟',
-  //     level: Level.green,
-  //     memoryState: MemoryState.green,
-  //     cooldown: 0,
-  //   ),
-  // ]);
-  // chatViewModel.initGenerativeModels();
-  // await chatViewModel.generateQuestion();
-
-  // print('running userResponse method');
-  // await chatViewModel.userResponse(Option(label: 'A', word: 'recession'), []);
-
   runApp(
     MultiProvider(
       providers: [

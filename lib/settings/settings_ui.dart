@@ -101,16 +101,16 @@ class _SettingsUiState extends State<SettingsUi> {
               decoration: _fieldDecoration('語言模型'),
               items: const [
                 DropdownMenuItem<String>(
-                  value: 'gemma-4-31b-it',
-                  child: Text('Gemma 4 31B it (Recommended)'),
+                  value: 'gemini-3.1-flash-lite',
+                  child: Text('Gemini 3.1 flash lite (Recommended)'),
                 ),
                 DropdownMenuItem<String>(
-                  value: 'gemma-4-26b-a4b-it',
-                  child: Text('Gemma 4 26B a4b it'),
+                  value: 'gemma-4-31b-it',
+                  child: Text('Gemma 4 31B it'),
                 ),
               ],
               onChanged: (value) =>
-                  _selectedModel = value ?? 'gemma-4-31b-it',
+                  _selectedModel = value ?? 'gemini-3.1-flash-lite',
             ),
             const SizedBox(height: 4),
             SizedBox(

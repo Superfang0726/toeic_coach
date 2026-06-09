@@ -60,7 +60,7 @@ This is the heart of the app and lives in `lib/vocabulary/vocab_domain.dart` (pu
 
 - **Vocabulary** → `ExcelRepository` reads/writes `vocabulary.xlsx` in the app documents directory. Every mutating `VocabularyViewmodel` method writes the whole list back to Excel immediately after updating the `Store`. Columns: `id, word, mean, level, state, cooldown`.
 - **API key** → `SecureStorageRepository` (flutter_secure_storage).
-- **Model name** → `SharedPreferencesRepository` (defaults to `gemma-4-31b-it`).
+- **Model name** → `SharedPreferencesRepository` (defaults to `gemini-3.1-flash-lite`).
 
 ## Conventions & gotchas
 
