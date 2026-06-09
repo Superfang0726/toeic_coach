@@ -26,7 +26,6 @@ class _ChatUiState extends State<ChatUi> {
       vocabularyViewModel: context.read<VocabularyViewmodel>(),
     );
     _chatViewModel.initGenerativeModels();
-    _chatViewModel.startQuestion();
   }
 
   // A review line prefixed with a bullet.
@@ -34,7 +33,10 @@ class _ChatUiState extends State<ChatUi> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('•  ', style: TextStyle(fontSize: 18, color: kTextSecondary)),
+        const Text(
+          '•  ',
+          style: TextStyle(fontSize: 18, color: kTextSecondary),
+        ),
         Expanded(
           child: Text(
             text,
@@ -122,8 +124,94 @@ class _ChatUiState extends State<ChatUi> {
     return ListenableBuilder(
       listenable: _chatViewModel,
       builder: (context, _) {
-        if (_chatViewModel.chatState == ChatState.generatingQuestion) {
-          return const _ChatLoading(label: 'Generating question…');
+        if (_chatViewModel.chatState == ChatState.waitingUserGenerateQuestion) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _ChatCard(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Error banner — shown only when the last attempt failed
+                    // with a permanent error (e.g. invalid API key).
+                    if (_chatViewModel.errorMessage != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: kError.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: Border.all(color: kError),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              color: kError,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                _chatViewModel.errorMessage!,
+                                style: const TextStyle(color: kError),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                    // Circular icon badge.
+                    Container(
+                      width: 72,
+                      height: 72,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: kPrimaryLight,
+                      ),
+                      child: const Icon(
+                        Icons.school_rounded,
+                        size: 40,
+                        color: kPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      '準備好開始了嗎？',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: kTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '點擊下方按鈕，為你生成一題 TOEIC 練習。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: kTextSecondary),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: 240,
+                      child: _ChatActionButton(
+                        enabled: true,
+                        icon: Icons.play_arrow_rounded,
+                        label: '開始出題',
+                        onPressed: () => _chatViewModel.startQuestion(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        } else if (_chatViewModel.chatState == ChatState.generatingQuestion) {
+          return _ChatLoading(
+            label: 'Generating question…',
+            retryTimes: _chatViewModel.retryTimes,
+          );
         } else if (_chatViewModel.chatState == ChatState.displayingQuestion) {
           final bool hasSelection = _chatViewModel.selectedOption != null;
           return Padding(
@@ -194,7 +282,10 @@ class _ChatUiState extends State<ChatUi> {
             ),
           );
         } else if (_chatViewModel.chatState == ChatState.generatingReview) {
-          return const _ChatLoading(label: 'Reviewing…');
+          return _ChatLoading(
+            label: 'Reviewing…',
+            retryTimes: _chatViewModel.retryTimes,
+          );
         } else if (_chatViewModel.chatState == ChatState.displayingReview) {
           final String result = _chatViewModel.result ?? '';
           // Prefer the model's structured flag; fall back to the wrong-answer
@@ -286,6 +377,18 @@ class _ChatUiState extends State<ChatUi> {
               ),
             ),
           );
+        } else if (_chatViewModel.chatState ==
+            ChatState.failToGenerateQuestion) {
+          return _FailureView(
+            message: '題目生成失敗，請稍後再試',
+            onRetry: () => _chatViewModel.startQuestion(),
+          );
+        } else if (_chatViewModel.chatState ==
+            ChatState.failToGenerateReview) {
+          return _FailureView(
+            message: '批改失敗，請稍後再試',
+            onRetry: () => _chatViewModel.submitAnswer(),
+          );
         }
         return Placeholder();
       },
@@ -293,11 +396,74 @@ class _ChatUiState extends State<ChatUi> {
   }
 }
 
-/// Centered loading view for the generating states.
+/// Centered failure view shown when retries are exhausted. Displays a message
+/// and a retry button; the caller wires [onRetry] to the matching action
+/// (regenerate question / resubmit answer).
+class _FailureView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _FailureView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: _ChatCard(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Circular icon badge.
+              Container(
+                width: 72,
+                height: 72,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: kError.withValues(alpha: 0.1),
+                ),
+                child: const Icon(
+                  Icons.cloud_off_rounded,
+                  size: 40,
+                  color: kError,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: kTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: 240,
+                child: _ChatActionButton(
+                  enabled: true,
+                  icon: Icons.refresh_rounded,
+                  label: '重試',
+                  onPressed: onRetry,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Centered loading view for the generating states. When [retryTimes] is
+/// greater than 0 it also shows a "retrying…" hint with the attempt count.
 class _ChatLoading extends StatelessWidget {
   final String label;
+  final int retryTimes;
 
-  const _ChatLoading({required this.label});
+  const _ChatLoading({required this.label, this.retryTimes = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -314,6 +480,13 @@ class _ChatLoading extends StatelessWidget {
                 label,
                 style: const TextStyle(fontSize: 16, color: kTextSecondary),
               ),
+              if (retryTimes > 0) ...[
+                const SizedBox(height: 8),
+                Text(
+                  '連線不穩，重試中…（第 $retryTimes 次）',
+                  style: const TextStyle(fontSize: 14, color: kWarning),
+                ),
+              ],
             ],
           ),
         ),

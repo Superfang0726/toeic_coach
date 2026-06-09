@@ -1,4 +1,5 @@
 enum ChatState {
+  waitingUserGenerateQuestion,
   generatingQuestion,
   failToGenerateQuestion,
   displayingQuestion,
