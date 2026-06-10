@@ -88,7 +88,7 @@ class GeminiRepository {
               items: Schema.string(
                 description:
                     "Provide meanings about the vocabulary user is unfamiliar or answer wrong, and explain why the answer is wrong",
-                nullable: true,
+                nullable: false,
               ),
             ),
             'memoryStateUpdateResult': Schema.array(
@@ -141,6 +141,7 @@ class GeminiRepository {
                     ),
                   ),
                 },
+                requiredProperties: ['updates'],
               ), //items: Schema.object(properties: {Schema.enumString(enumValues: ['upgrade', 'downgrade'], description: 'Use upgrade on vocabulary that answer correct, and use downgrade on vocabulary that answer wrong or unfamiliar', nullable: false)}),
             ),
           ],

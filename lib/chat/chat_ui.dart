@@ -349,7 +349,9 @@ class _ChatUiState extends State<ChatUi> {
                                     ),
                                   ),
                                   // Review.
-                                  if (_chatViewModel.reviewItems.isNotEmpty) ...[
+                                  if (_chatViewModel
+                                      .reviewItems
+                                      .isNotEmpty) ...[
                                     const _ReviewHeading('檢討'),
                                     ..._chatViewModel.reviewItems.map(
                                       (e) => _reviewBullet(e),
