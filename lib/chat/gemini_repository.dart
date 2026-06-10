@@ -71,6 +71,7 @@ class GeminiRepository {
       model: modelName,
       apiKey: apiKey,
       generationConfig: GenerationConfig(
+        temperature: 0.2,
         responseMimeType: 'application/json',
         responseSchema: Schema.object(
           properties: {
@@ -112,6 +113,7 @@ class GeminiRepository {
     _updateMemoryStateModel = GenerativeModel(
       model: modelName,
       apiKey: apiKey,
+      generationConfig: GenerationConfig(temperature: 0.2),
       tools: [
         Tool(
           functionDeclarations: [
@@ -128,7 +130,7 @@ class GeminiRepository {
                         ),
                         'mean': Schema.string(
                           description:
-                              'The meaning of the wrong answer or unfamiliar word in traditional chinese',
+                              'The meaning of the word in traditional chinese',
                           nullable: false,
                         ),
                         'adjustment': Schema.enumString(
