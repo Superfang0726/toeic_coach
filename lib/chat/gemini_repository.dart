@@ -116,7 +116,7 @@ class GeminiRepository {
           functionDeclarations: [
             FunctionDeclaration(
               'updateMemoryState',
-              'Use function calling to upgrade or downgrade memoryState according to "memoryStateResult"',
+              'Use function calling to upgrade or downgrade memoryState according to "memoryStateUpdateResult"',
               Schema.object(
                 properties: {
                   'updates': Schema.array(

@@ -65,7 +65,7 @@ This is the heart of the app and lives in `lib/vocabulary/vocab_domain.dart` (pu
 ## Conventions & gotchas
 
 - The codebase uses `print` for debugging and has scattered `//TODO:` markers (e.g. "alert user", broken-row cleanup) — these mark genuinely unfinished work.
-- Prompt text in `PromptSetter` references a tool named `updateVocab`, but the actual `FunctionDeclaration` is named `updateMemoryState`. Keep this in mind if editing either side.
+- `PromptSetter.reviewPrompt` deliberately does **not** mention any tool — the review model has no tools and only fills the `memoryStateUpdateResult` JSON field; the actual `updateMemoryState` function call happens in the separate third model, which reads that field from history. Keep the field name consistent across both sides if editing either.
 - `Vocab` and `Option` are mutable value classes; `VocabAdjustment` is immutable. Neither `Vocab` nor `Option` has JSON serialization — Excel I/O is hand-rolled in `ExcelRepository`.
 
 ## Active task specs
