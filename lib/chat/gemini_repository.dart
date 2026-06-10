@@ -87,10 +87,20 @@ class GeminiRepository {
               ),
             ),
             'memoryStateUpdateResult': Schema.array(
-              items: Schema.string(
-                description:
-                    'List all updates of vocabulary memoryState by using ">" to point out upgrade or downgrade in "<word> > <upgrade/downgrade>" pattern',
-                nullable: false,
+              items: Schema.object(
+                properties: {
+                  'word': Schema.string(
+                    description: 'The vocabulary word whose memoryState changes',
+                    nullable: false,
+                  ),
+                  'adjustment': Schema.enumString(
+                    enumValues: ['upgrade', 'downgrade'],
+                    description:
+                        'upgrade if the word was answered correctly, downgrade if it was answered wrong or flagged unfamiliar',
+                    nullable: false,
+                  ),
+                },
+                requiredProperties: ['word', 'adjustment'],
               ),
             ),
           },

@@ -195,7 +195,10 @@ class ChatViewModel with ChangeNotifier {
             .map((e) => e as String)
             .toList();
         _memoryStateUpdateResult = (map['memoryStateUpdateResult'] as List)
-            .map((e) => e as String)
+            .map((e) {
+              final entry = e as Map<String, dynamic>;
+              return '${entry['word']} > ${entry['adjustment']}';
+            })
             .toList();
 
         chatState = ChatState.displayingReview;

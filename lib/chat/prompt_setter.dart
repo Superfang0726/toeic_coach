@@ -51,13 +51,13 @@ Goal: Explain the result above to user in traditional chinese, and record memory
 Workflow:
 1. In "result", tell user in one short sentence whether the answer is correct, and if wrong, which option is correct. Do not explain why there.
 2. If the answer is wrong, explain in "review" why the correct option fits the blank and why user's choice does not.
-3. Record "${correctAnswer.word} > ${isCorrect ? 'upgrade' : 'downgrade'}" in "memoryStateUpdateResult".
+3. Record an entry with word "${correctAnswer.word}" and adjustment "${isCorrect ? 'upgrade' : 'downgrade'}" in "memoryStateUpdateResult".
 """);
 
     if (unfamiliarWords.isNotEmpty) {
       buffer.writeln("""
 4. Explain in "review" the meaning of each unfamiliar vocabulary as it is used in the sentence.
-5. Record "<word> > downgrade" in "memoryStateUpdateResult" for every unfamiliar vocabulary listed above.
+5. Record an entry with adjustment "downgrade" in "memoryStateUpdateResult" for every unfamiliar vocabulary listed above.
 """);
     }
 
