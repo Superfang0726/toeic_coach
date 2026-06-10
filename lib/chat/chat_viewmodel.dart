@@ -27,6 +27,7 @@ class ChatViewModel with ChangeNotifier {
   //llm response
   late String _sentence;
   late List<Option> _options;
+  String _correctLabel = '';
   Option? _selectedOption;
   String? _result;
   bool? _isCorrect;
@@ -77,9 +78,16 @@ class ChatViewModel with ChangeNotifier {
 
   Future<String> _userResponse(
     Option userAnswer,
+    Option correctAnswer,
+    bool isCorrect,
     List<String> unfamiliarWords,
   ) async {
-    String prompt = PromptSetter.reviewPrompt(userAnswer, unfamiliarWords);
+    String prompt = PromptSetter.reviewPrompt(
+      userAnswer,
+      correctAnswer,
+      isCorrect,
+      unfamiliarWords,
+    );
     final (response, history) = await _geminiRepository.reviewUserAnswer(
       prompt,
       _history,
@@ -139,6 +147,7 @@ class ChatViewModel with ChangeNotifier {
           );
           return Option(label: k, word: word);
         }).toList();
+        _correctLabel = map['answer'] as String;
 
         chatState = ChatState.displayingQuestion;
         notifyListeners();
@@ -159,9 +168,19 @@ class ChatViewModel with ChangeNotifier {
     chatState = ChatState.generatingReview;
     notifyListeners();
 
+    final Option correctOption = _options.firstWhere(
+      (option) => option.label == _correctLabel,
+    );
+    _isCorrect = selectedOption!.label == _correctLabel;
+
     try {
       final String? modelResponse = await RetryHandler.retryHandler(
-        () => _userResponse(selectedOption!, unfamiliarWords),
+        () => _userResponse(
+          selectedOption!,
+          correctOption,
+          _isCorrect!,
+          unfamiliarWords,
+        ),
         5,
         onRetry: (currentTimes) {
           _retryTimes = currentTimes;
@@ -172,7 +191,6 @@ class ChatViewModel with ChangeNotifier {
       if (modelResponse != null) {
         final map = jsonDecode(modelResponse);
         _result = map['result'] as String;
-        _isCorrect = map['isCorrect'] as bool;
         _reviewItems = ((map['review'] as List?) ?? const [])
             .map((e) => e as String)
             .toList();

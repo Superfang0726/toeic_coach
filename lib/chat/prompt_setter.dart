@@ -22,9 +22,20 @@ Workflow:
     return buffer.toString();
   }
 
-  static String reviewPrompt(Option userAnswer, List<String> unfamiliarWords) {
+  static String reviewPrompt(
+    Option userAnswer,
+    Option correctAnswer,
+    bool isCorrect,
+    List<String> unfamiliarWords,
+  ) {
     StringBuffer buffer = StringBuffer();
-    buffer.writeln("User's answer is ${userAnswer.label}. ${userAnswer.word}");
+    buffer.writeln(
+      'The correct answer is (${correctAnswer.label}) ${correctAnswer.word}.',
+    );
+    buffer.writeln(
+      "User's answer is (${userAnswer.label}) ${userAnswer.word}, "
+      'which is ${isCorrect ? 'correct' : 'wrong'}.',
+    );
 
     if (unfamiliarWords.isNotEmpty) {
       buffer.writeln(
@@ -36,16 +47,17 @@ Workflow:
     }
 
     buffer.writeln("""
-Goal: Evaluate the answer, tell user if the answer is correct or not in traditional chinese. Besides, if the answer is wrong or user provide some unfamiliar vocabulary, record its adjustment in the "memoryStateUpdateResult" field.
+Goal: Explain the result above to user in traditional chinese, and record memoryState adjustments in the "memoryStateUpdateResult" field. Correctness is already determined above, do not re-judge it.
 Workflow:
-1. Evaluate the answer based on chat history.
-2. If the answer is correct, tell user the answer provided is correct, and record "<word> > upgrade" for the answered vocabulary in "memoryStateUpdateResult"; if not, tell user which option is correct and why user's choice is wrong, and record "<word> > downgrade" instead.
+1. In "result", tell user in one short sentence whether the answer is correct, and if wrong, which option is correct. Do not explain why there.
+2. If the answer is wrong, explain in "review" why the correct option fits the blank and why user's choice does not.
+3. Record "${correctAnswer.word} > ${isCorrect ? 'upgrade' : 'downgrade'}" in "memoryStateUpdateResult".
 """);
 
     if (unfamiliarWords.isNotEmpty) {
       buffer.writeln("""
-3. Tell user the mean of the unfamiliar vocabulary in the sentence.
-4. Downgrade the unfamiliar vocabulary by recording "<word> > downgrade" in "memoryStateUpdateResult" depends on how common it is. If it appear in TOEIC test usually or has enough confusion, downgrade it.
+4. Explain in "review" the meaning of each unfamiliar vocabulary as it is used in the sentence.
+5. Record "<word> > downgrade" in "memoryStateUpdateResult" for every unfamiliar vocabulary listed above.
 """);
     }
 

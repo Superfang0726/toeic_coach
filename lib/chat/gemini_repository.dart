@@ -76,18 +76,13 @@ class GeminiRepository {
           properties: {
             'result': Schema.string(
               description:
-                  "Output if user's answer is correct or not, don't explain why",
-              nullable: false,
-            ),
-            'isCorrect': Schema.boolean(
-              description:
-                  "true if the user's answer is correct, false otherwise",
+                  "One short sentence in traditional chinese telling user whether the answer is correct, and if wrong, which option is the correct answer. No explanation here.",
               nullable: false,
             ),
             'review': Schema.array(
               items: Schema.string(
                 description:
-                    "Provide meanings about the vocabulary user is unfamiliar or answer wrong, and explain why the answer is wrong",
+                    "An explanation item in traditional chinese: why the correct option fits the blank and user's choice does not, or the meaning of an unfamiliar vocabulary as used in the sentence. Empty array if the answer is correct and there is no unfamiliar vocabulary.",
                 nullable: false,
               ),
             ),
@@ -99,11 +94,7 @@ class GeminiRepository {
               ),
             ),
           },
-          requiredProperties: [
-            'result',
-            'isCorrect',
-            'memoryStateUpdateResult',
-          ],
+          requiredProperties: ['result', 'memoryStateUpdateResult'],
         ),
       ),
     );
