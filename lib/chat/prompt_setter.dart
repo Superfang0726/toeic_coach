@@ -15,9 +15,10 @@ class PromptSetter {
 Goal: Using the vocabulary data provided above, generate one TOEIC Part 5 question by following the rules below.
 Workflow: 
 1. Classify the vocabulary according to its level: red and yellow words should be used as the answer choices for the blank, while green words should be used to construct the question sentence.
-2. The four different answer choices for the blank must be selected from the red and yellow words. If the vocabulary data contains fewer than four red and yellow words, include all available red and yellow words, and fill the remaining answer choices with commonly differently confused TOEIC vocabulary.
-3. Select one of the four answer choices as the correct answer.
-4. After selecting the correct answer, construct the question sentence using as many relevant green words as possible, ensuring that the correct answer naturally and grammatically fits the blank.""",
+2. The four different answer choices for the blank must be selected from the red and yellow words. If the vocabulary data contains fewer than four red and yellow words, include all available red and yellow words, and fill the remaining answer choices with plausible TOEIC-level distractors that are not in the table.
+3. Select one of the four answer choices as the correct answer, and place it at a randomly chosen position among A, B, C and D.
+4. After selecting the correct answer, construct the question sentence using as many relevant green words as possible. The sentence must contain exactly one blank written as "___", and the correct answer must fit it naturally and grammatically.
+5. Exactly one choice may fit the blank: the other three choices must be clearly wrong in this sentence, either by meaning or by usage.""",
     );
     return buffer.toString();
   }

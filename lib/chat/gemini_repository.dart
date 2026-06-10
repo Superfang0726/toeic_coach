@@ -18,11 +18,6 @@ class GeminiRepository {
         responseMimeType: 'application/json',
         responseSchema: Schema.object(
           properties: {
-            'sentence': Schema.string(
-              description:
-                  'Generate a sentence with blank as ___ in TOEIC Part 5 pattern',
-              nullable: false,
-            ),
             'options': Schema.object(
               properties: {
                 'A': Schema.string(
@@ -61,8 +56,13 @@ class GeminiRepository {
               description: 'The key of the correct choice for the blank.',
               nullable: false,
             ),
+            'sentence': Schema.string(
+              description:
+                  'A sentence in TOEIC Part 5 pattern containing exactly one blank written as "___", which only the correct choice can fill',
+              nullable: false,
+            ),
           },
-          requiredProperties: ['sentence', 'options', 'answer'],
+          requiredProperties: ['options', 'answer', 'sentence'],
         ),
       ),
     );
