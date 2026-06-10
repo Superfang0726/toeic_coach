@@ -173,7 +173,9 @@ class ChatViewModel with ChangeNotifier {
         final map = jsonDecode(modelResponse);
         _result = map['result'] as String;
         _isCorrect = map['isCorrect'] as bool;
-        _reviewItems = (map['review'] as List).map((e) => e as String).toList();
+        _reviewItems = ((map['review'] as List?) ?? const [])
+            .map((e) => e as String)
+            .toList();
         _memoryStateUpdateResult = (map['memoryStateUpdateResult'] as List)
             .map((e) => e as String)
             .toList();

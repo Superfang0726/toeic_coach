@@ -349,10 +349,12 @@ class _ChatUiState extends State<ChatUi> {
                                     ),
                                   ),
                                   // Review.
-                                  const _ReviewHeading('檢討'),
-                                  ..._chatViewModel.reviewItems.map(
-                                    (e) => _reviewBullet(e),
-                                  ),
+                                  if (_chatViewModel.reviewItems.isNotEmpty) ...[
+                                    const _ReviewHeading('檢討'),
+                                    ..._chatViewModel.reviewItems.map(
+                                      (e) => _reviewBullet(e),
+                                    ),
+                                  ],
                                   // Memory-state adjustments.
                                   const _ReviewHeading('記憶狀態調整'),
                                   ..._chatViewModel.memoryStateAdjustment.map(
@@ -383,8 +385,7 @@ class _ChatUiState extends State<ChatUi> {
             message: '題目生成失敗，請稍後再試',
             onRetry: () => _chatViewModel.startQuestion(),
           );
-        } else if (_chatViewModel.chatState ==
-            ChatState.failToGenerateReview) {
+        } else if (_chatViewModel.chatState == ChatState.failToGenerateReview) {
           return _FailureView(
             message: '批改失敗，請稍後再試',
             onRetry: () => _chatViewModel.submitAnswer(),
