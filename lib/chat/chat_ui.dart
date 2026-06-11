@@ -317,6 +317,41 @@ class _ChatUiState extends State<ChatUi> {
     );
   }
 
+  // A single answer option decorating shell
+  Widget _buildOptionShell({
+    required Option option,
+    Color badgeColor = kPrimaryLight,
+    Widget? trailing,
+  }) {
+    return Row(
+      children: [
+        // Circular label badge — kept white on a selected (tinted) card so
+        // it stays legible.
+        Container(
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: badgeColor),
+          child: Text(
+            option.label,
+            style: const TextStyle(
+              color: kPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            option.word,
+            style: const TextStyle(fontSize: 18, color: kTextPrimary),
+          ),
+        ),
+        ?trailing,
+      ],
+    );
+  }
+
   // A single answer option rendered as a card with an A/B/C/D badge.
   Widget _buildOptionCard(Option option, bool selected) {
     return GestureDetector(
@@ -332,35 +367,12 @@ class _ChatUiState extends State<ChatUi> {
             width: selected ? 2 : 1,
           ),
         ),
-        child: Row(
-          children: [
-            // Circular label badge — kept white on a selected (tinted) card so
-            // it stays legible.
-            Container(
-              width: 32,
-              height: 32,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: selected ? kSurface : kPrimaryLight,
-              ),
-              child: Text(
-                option.label,
-                style: const TextStyle(
-                  color: kPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                option.word,
-                style: const TextStyle(fontSize: 18, color: kTextPrimary),
-              ),
-            ),
-            if (selected) const Icon(Icons.check_circle, color: kPrimary),
-          ],
+        child: _buildOptionShell(
+          option: option,
+          badgeColor: selected ? kSurface : kPrimaryLight,
+          trailing: selected
+              ? const Icon(Icons.check_circle, color: kPrimary)
+              : null,
         ),
       ),
     );
