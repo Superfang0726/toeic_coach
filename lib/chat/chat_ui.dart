@@ -28,8 +28,255 @@ class _ChatUiState extends State<ChatUi> {
     _chatViewModel.initGenerativeModels();
   }
 
+  // A page to wait user confirm question generation
+  Widget _buildStartView() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: _ChatCard(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Error banner — shown only when the last attempt failed
+              // with a permanent error (e.g. invalid API key).
+              if (_chatViewModel.errorMessage != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: kError.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(color: kError),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline, color: kError, size: 20),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          _chatViewModel.errorMessage!,
+                          style: const TextStyle(color: kError),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+              // Circular icon badge.
+              Container(
+                width: 72,
+                height: 72,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: kPrimaryLight,
+                ),
+                child: const Icon(
+                  Icons.school_rounded,
+                  size: 40,
+                  color: kPrimary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '準備好開始了嗎？',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: kTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '點擊下方按鈕，為你生成一題 TOEIC 練習。',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: kTextSecondary),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: 240,
+                child: _ChatActionButton(
+                  enabled: true,
+                  icon: Icons.play_arrow_rounded,
+                  label: '開始出題',
+                  onPressed: () => _chatViewModel.startQuestion(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // display question and option
+  Widget _buildQuestionView() {
+    final bool hasSelection = _chatViewModel.selectedOption != null;
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: _ChatCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Scrollable content; the submit button stays pinned below.
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Question sentence — soft blue gradient card with
+                    // tappable word tokens.
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [kPrimaryLight, kSurface],
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Wrap(
+                        spacing: 8.0,
+                        runSpacing: 8.0,
+                        children: _chatViewModel.sentence
+                            .split(' ')
+                            .map(
+                              (word) => _WordToken(
+                                word: word,
+                                unfamiliar: _chatViewModel.unfamiliarWords
+                                    .contains(word),
+                                onTap: () =>
+                                    _chatViewModel.toggleUnfamiliarWord(word),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Options — one card each, A/B/C/D badge.
+                    ..._chatViewModel.options.map(
+                      (option) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildOptionCard(
+                          option,
+                          _chatViewModel.selectedOption == option,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _ChatActionButton(
+              enabled: hasSelection,
+              icon: Icons.send_rounded,
+              label: '送出',
+              onPressed: () {
+                if (hasSelection) _chatViewModel.submitAnswer();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // display review
+  Widget _buildReviewView() {
+    final String result = _chatViewModel.result ?? '';
+    // Prefer the model's structured flag; fall back to the wrong-answer
+    // message heuristic ("錯誤") only if the flag is missing.
+    final bool isCorrect = _chatViewModel.isCorrect ?? !result.contains('錯誤');
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: _ChatCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    border: Border.all(color: kBorder),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Top result strip.
+                      Container(
+                        height: 4,
+                        color: isCorrect ? kSuccess : kError,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 16.0,
+                          children: [
+                            // Result title + icon.
+                            Row(
+                              children: [
+                                Icon(
+                                  isCorrect ? Icons.check_circle : Icons.cancel,
+                                  color: isCorrect ? kSuccess : kError,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  '回答結果',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: kTextPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              result,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: kTextPrimary,
+                              ),
+                            ),
+                            // Review.
+                            if (_chatViewModel.reviewItems.isNotEmpty) ...[
+                              const _ReviewHeading('檢討'),
+                              ..._chatViewModel.reviewItems.map(
+                                (e) => _buildReviewBullet(e),
+                              ),
+                            ],
+                            // Memory-state adjustments.
+                            const _ReviewHeading('記憶狀態調整'),
+                            ..._chatViewModel.memoryStateAdjustment.map(
+                              (e) => _buildAdjustmentRow(e),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _ChatActionButton(
+              enabled: true,
+              icon: Icons.arrow_forward_rounded,
+              label: '下一題',
+              onPressed: () => _chatViewModel.startQuestion(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // A review line prefixed with a bullet.
-  Widget _reviewBullet(String text) {
+  Widget _buildReviewBullet(String text) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,7 +296,7 @@ class _ChatUiState extends State<ChatUi> {
 
   // A memory-state adjustment line: up arrow (green) for an upgrade, down
   // arrow (red) for a downgrade.
-  Widget _adjustmentRow(String text) {
+  Widget _buildAdjustmentRow(String text) {
     final bool isUpgrade = text.toLowerCase().contains('upgrade');
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +318,7 @@ class _ChatUiState extends State<ChatUi> {
   }
 
   // A single answer option rendered as a card with an A/B/C/D badge.
-  Widget _optionCard(Option option, bool selected) {
+  Widget _buildOptionCard(Option option, bool selected) {
     return GestureDetector(
       onTap: () => _chatViewModel.toggleOption(option),
       child: AnimatedContainer(
@@ -125,262 +372,21 @@ class _ChatUiState extends State<ChatUi> {
       listenable: _chatViewModel,
       builder: (context, _) {
         if (_chatViewModel.chatState == ChatState.waitingUserGenerateQuestion) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _ChatCard(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Error banner — shown only when the last attempt failed
-                    // with a permanent error (e.g. invalid API key).
-                    if (_chatViewModel.errorMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: kError.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(color: kError),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              color: kError,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                _chatViewModel.errorMessage!,
-                                style: const TextStyle(color: kError),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                    // Circular icon badge.
-                    Container(
-                      width: 72,
-                      height: 72,
-                      alignment: Alignment.center,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: kPrimaryLight,
-                      ),
-                      child: const Icon(
-                        Icons.school_rounded,
-                        size: 40,
-                        color: kPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      '準備好開始了嗎？',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: kTextPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      '點擊下方按鈕，為你生成一題 TOEIC 練習。',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: kTextSecondary),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: 240,
-                      child: _ChatActionButton(
-                        enabled: true,
-                        icon: Icons.play_arrow_rounded,
-                        label: '開始出題',
-                        onPressed: () => _chatViewModel.startQuestion(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
+          return _buildStartView();
         } else if (_chatViewModel.chatState == ChatState.generatingQuestion) {
           return _ChatLoading(
             label: 'Generating question…',
             retryTimes: _chatViewModel.retryTimes,
           );
         } else if (_chatViewModel.chatState == ChatState.displayingQuestion) {
-          final bool hasSelection = _chatViewModel.selectedOption != null;
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _ChatCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Scrollable content; the submit button stays pinned below.
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Question sentence — soft blue gradient card with
-                          // tappable word tokens.
-                          Container(
-                            padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [kPrimaryLight, kSurface],
-                              ),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Wrap(
-                              spacing: 8.0,
-                              runSpacing: 8.0,
-                              children: _chatViewModel.sentence
-                                  .split(' ')
-                                  .map(
-                                    (word) => _WordToken(
-                                      word: word,
-                                      unfamiliar: _chatViewModel.unfamiliarWords
-                                          .contains(word),
-                                      onTap: () => _chatViewModel
-                                          .toggleUnfamiliarWord(word),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          // Options — one card each, A/B/C/D badge.
-                          ..._chatViewModel.options.map(
-                            (option) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _optionCard(
-                                option,
-                                _chatViewModel.selectedOption == option,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _ChatActionButton(
-                    enabled: hasSelection,
-                    icon: Icons.send_rounded,
-                    label: '送出',
-                    onPressed: () {
-                      if (hasSelection) _chatViewModel.submitAnswer();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
+          return _buildQuestionView();
         } else if (_chatViewModel.chatState == ChatState.generatingReview) {
           return _ChatLoading(
             label: 'Reviewing…',
             retryTimes: _chatViewModel.retryTimes,
           );
         } else if (_chatViewModel.chatState == ChatState.displayingReview) {
-          final String result = _chatViewModel.result ?? '';
-          // Prefer the model's structured flag; fall back to the wrong-answer
-          // message heuristic ("錯誤") only if the flag is missing.
-          final bool isCorrect =
-              _chatViewModel.isCorrect ?? !result.contains('錯誤');
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _ChatCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Container(
-                        clipBehavior: Clip.antiAlias,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.0),
-                          border: Border.all(color: kBorder),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Top result strip.
-                            Container(
-                              height: 4,
-                              color: isCorrect ? kSuccess : kError,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 16.0,
-                                children: [
-                                  // Result title + icon.
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        isCorrect
-                                            ? Icons.check_circle
-                                            : Icons.cancel,
-                                        color: isCorrect ? kSuccess : kError,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Text(
-                                        '回答結果',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700,
-                                          color: kTextPrimary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    result,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w600,
-                                      color: kTextPrimary,
-                                    ),
-                                  ),
-                                  // Review.
-                                  if (_chatViewModel
-                                      .reviewItems
-                                      .isNotEmpty) ...[
-                                    const _ReviewHeading('檢討'),
-                                    ..._chatViewModel.reviewItems.map(
-                                      (e) => _reviewBullet(e),
-                                    ),
-                                  ],
-                                  // Memory-state adjustments.
-                                  const _ReviewHeading('記憶狀態調整'),
-                                  ..._chatViewModel.memoryStateAdjustment.map(
-                                    (e) => _adjustmentRow(e),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _ChatActionButton(
-                    enabled: true,
-                    icon: Icons.arrow_forward_rounded,
-                    label: '下一題',
-                    onPressed: () => _chatViewModel.startQuestion(),
-                  ),
-                ],
-              ),
-            ),
-          );
+          return _buildReviewView();
         } else if (_chatViewModel.chatState ==
             ChatState.failToGenerateQuestion) {
           return _FailureView(
