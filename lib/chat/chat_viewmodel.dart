@@ -37,6 +37,7 @@ class ChatViewModel with ChangeNotifier {
   List<String> get unfamiliarWords => _unfamiliarWords;
   String get sentence => _sentence;
   List<Option> get options => _options;
+  String get correctLabel => _correctLabel;
   Option? get selectedOption => _selectedOption;
   String? get result => _result;
   bool? get isCorrect => _isCorrect;
@@ -194,12 +195,12 @@ class ChatViewModel with ChangeNotifier {
         _reviewItems = ((map['review'] as List?) ?? const [])
             .map((e) => e as String)
             .toList();
-        _memoryStateUpdateResult = (map['memoryStateUpdateResult'] as List)
-            .map((e) {
-              final entry = e as Map<String, dynamic>;
-              return '${entry['word']} > ${entry['adjustment']}';
-            })
-            .toList();
+        _memoryStateUpdateResult = (map['memoryStateUpdateResult'] as List).map(
+          (e) {
+            final entry = e as Map<String, dynamic>;
+            return '${entry['word']} > ${entry['adjustment']}';
+          },
+        ).toList();
 
         chatState = ChatState.displayingReview;
         notifyListeners();
