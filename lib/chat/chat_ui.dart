@@ -18,6 +18,11 @@ class ChatUi extends StatefulWidget {
 class _ChatUiState extends State<ChatUi> {
   late ChatViewModel _chatViewModel;
 
+  // Scrolls the review page to the bottom the first time it is shown so the
+  // latest feedback is visible. Re-armed each time we leave the review state.
+  final ScrollController _reviewScrollController = ScrollController();
+  bool _reviewScrolledToBottom = false;
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +31,12 @@ class _ChatUiState extends State<ChatUi> {
       vocabularyViewModel: context.read<VocabularyViewmodel>(),
     );
     _chatViewModel.initGenerativeModels();
+  }
+
+  @override
+  void dispose() {
+    _reviewScrollController.dispose();
+    super.dispose();
   }
 
   // A page to wait user confirm question generation
@@ -188,6 +199,19 @@ class _ChatUiState extends State<ChatUi> {
     // Prefer the model's structured flag; fall back to the wrong-answer
     // message heuristic ("錯誤") only if the flag is missing.
     final bool isCorrect = _chatViewModel.isCorrect ?? !result.contains('錯誤');
+    // Jump to the bottom once when the review first appears. If the content is
+    // shorter than the viewport maxScrollExtent is 0, so this is a no-op and the
+    // content simply fills from the top.
+    if (!_reviewScrolledToBottom) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_reviewScrollController.hasClients) {
+          _reviewScrollController.jumpTo(
+            _reviewScrollController.position.maxScrollExtent,
+          );
+          _reviewScrolledToBottom = true;
+        }
+      });
+    }
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: _ChatCard(
@@ -197,7 +221,7 @@ class _ChatUiState extends State<ChatUi> {
             // Scrollable content; the next-question button stays pinned below.
             Expanded(
               child: SingleChildScrollView(
-                reverse: true,
+                controller: _reviewScrollController,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -230,10 +254,15 @@ class _ChatUiState extends State<ChatUi> {
                     // Options — one card each, A/B/C/D badge.
                     ..._chatViewModel.options.map(
                       (option) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildOptionCard(
-                          option,
-                          _chatViewModel.selectedOption == option,
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: kSurface,
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(color: kBorder, width: 1),
+                          ),
+                          padding: EdgeInsets.all(12),
+                          child: _buildOptionShell(option: option),
                         ),
                       ),
                     ),
@@ -438,6 +467,9 @@ class _ChatUiState extends State<ChatUi> {
         } else if (_chatViewModel.chatState == ChatState.displayingQuestion) {
           return _buildQuestionView();
         } else if (_chatViewModel.chatState == ChatState.generatingReview) {
+          // Re-arm the one-shot scroll-to-bottom. This state always precedes
+          // displayingReview, so the review opens scrolled to its latest entry.
+          _reviewScrolledToBottom = false;
           return _ChatLoading(
             label: 'Reviewing…',
             retryTimes: _chatViewModel.retryTimes,
