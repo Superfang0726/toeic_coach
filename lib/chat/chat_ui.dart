@@ -259,7 +259,14 @@ class _ChatUiState extends State<ChatUi> {
                           decoration: BoxDecoration(
                             color: kSurface,
                             borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(color: kBorder, width: 1),
+                            border: Border.all(
+                              color: _chatViewModel.correctLabel == option.label
+                                  ? kPrimary
+                                  : kBorder,
+                              width: _chatViewModel.correctLabel == option.label
+                                  ? 2
+                                  : 1,
+                            ),
                           ),
                           padding: EdgeInsets.all(12),
                           child: _buildOptionShell(option: option),
