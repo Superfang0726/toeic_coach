@@ -191,127 +191,130 @@ class _ChatUiState extends State<ChatUi> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: _ChatCard(
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            reverse: true,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [kPrimaryLight, kSurface],
-                      ),
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    child: Wrap(
-                      spacing: 8.0,
-                      runSpacing: 8.0,
-                      children: _chatViewModel.sentence
-                          .split(' ')
-                          .map(
-                            (word) => Text(
-                              word,
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: kTextPrimary,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Options — one card each, A/B/C/D badge.
-                  ..._chatViewModel.options.map(
-                    (option) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildOptionCard(
-                        option,
-                        _chatViewModel.selectedOption == option,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(color: kBorder),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Top result strip.
-                        Container(
-                          height: 4,
-                          color: isCorrect ? kSuccess : kError,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Scrollable content; the next-question button stays pinned below.
+            Expanded(
+              child: SingleChildScrollView(
+                reverse: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [kPrimaryLight, kSurface],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 16.0,
-                            children: [
-                              // Result title + icon.
-                              Row(
-                                children: [
-                                  Icon(
-                                    isCorrect
-                                        ? Icons.check_circle
-                                        : Icons.cancel,
-                                    color: isCorrect ? kSuccess : kError,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    '回答結果',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: kTextPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                result,
-                                style: const TextStyle(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Wrap(
+                        spacing: 8.0,
+                        runSpacing: 8.0,
+                        children: _chatViewModel.sentence
+                            .split(' ')
+                            .map(
+                              (word) => Text(
+                                word,
+                                style: TextStyle(
                                   fontSize: 20,
-                                  fontWeight: FontWeight.w600,
                                   color: kTextPrimary,
                                 ),
                               ),
-                              // Review.
-                              if (_chatViewModel.reviewItems.isNotEmpty) ...[
-                                const _ReviewHeading('檢討'),
-                                ..._chatViewModel.reviewItems.map(
-                                  (e) => _buildReviewBullet(e),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Options — one card each, A/B/C/D badge.
+                    ..._chatViewModel.options.map(
+                      (option) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildOptionCard(
+                          option,
+                          _chatViewModel.selectedOption == option,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16.0),
+                        border: Border.all(color: kBorder),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Top result strip.
+                          Container(
+                            height: 4,
+                            color: isCorrect ? kSuccess : kError,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 16.0,
+                              children: [
+                                // Result title + icon.
+                                Row(
+                                  children: [
+                                    Icon(
+                                      isCorrect
+                                          ? Icons.check_circle
+                                          : Icons.cancel,
+                                      color: isCorrect ? kSuccess : kError,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      '回答結果',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: kTextPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  result,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w600,
+                                    color: kTextPrimary,
+                                  ),
+                                ),
+                                // Review.
+                                if (_chatViewModel.reviewItems.isNotEmpty) ...[
+                                  const _ReviewHeading('檢討'),
+                                  ..._chatViewModel.reviewItems.map(
+                                    (e) => _buildReviewBullet(e),
+                                  ),
+                                ],
+                                // Memory-state adjustments.
+                                const _ReviewHeading('記憶狀態調整'),
+                                ..._chatViewModel.memoryStateAdjustment.map(
+                                  (e) => _buildAdjustmentRow(e),
                                 ),
                               ],
-                              // Memory-state adjustments.
-                              const _ReviewHeading('記憶狀態調整'),
-                              ..._chatViewModel.memoryStateAdjustment.map(
-                                (e) => _buildAdjustmentRow(e),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  _ChatActionButton(
-                    enabled: true,
-                    icon: Icons.arrow_forward_rounded,
-                    label: '下一題',
-                    onPressed: () => _chatViewModel.startQuestion(),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 16),
+            _ChatActionButton(
+              enabled: true,
+              icon: Icons.arrow_forward_rounded,
+              label: '下一題',
+              onPressed: () => _chatViewModel.startQuestion(),
+            ),
+          ],
         ),
       ),
     );
