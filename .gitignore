@@ -33,6 +33,9 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Release installer output (see docs/RELEASING.md)
+/dist/
+
 # Symbolication related
 app.*.symbols
 
