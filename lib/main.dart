@@ -5,6 +5,8 @@ import 'package:toeic_coach/settings/secure_storage_repository.dart';
 import 'package:toeic_coach/settings/settings_ui.dart';
 import 'package:toeic_coach/settings/shared_preferences_repository.dart';
 import 'package:toeic_coach/theme/app_theme.dart';
+import 'package:toeic_coach/update/update_dialog.dart';
+import 'package:toeic_coach/update/update_viewmodel.dart';
 import 'package:toeic_coach/vocabulary/database_ui.dart';
 import 'package:toeic_coach/vocabulary/vocabulary_viewmodel.dart';
 import 'store/app_store.dart';
@@ -50,6 +52,28 @@ class MainApp extends StatefulWidget {
 
 class MainAppState extends State<MainApp> {
   bool _isDatabaseUiVisible = true;
+  final UpdateViewModel _updateViewModel = UpdateViewModel();
+
+  @override
+  void initState() {
+    super.initState();
+    // Check GitHub for a newer release once the first frame is on screen, so
+    // startup is never blocked by the network. If one is available, surface
+    // the update dialog. A failed/offline check ends silently as "up to date".
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _updateViewModel.checkForUpdate();
+      if (!mounted) return;
+      if (_updateViewModel.status == UpdateStatus.available) {
+        UpdateDialog.show(context, _updateViewModel);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _updateViewModel.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
