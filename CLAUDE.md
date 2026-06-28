@@ -51,10 +51,13 @@ This is the heart of the app and lives in `lib/vocabulary/vocab_domain.dart` (pu
 
 - Each `Vocab` has a `Level` (red / yellow / green) and a finer `MemoryState` (redLow → redMedium → redHigh → yellowLow → yellowHigh → green).
 - `upgrade`/`downgrade` move a word one step along that chain (downgrades are punitive — a wrong yellow word drops straight to redLow). `inferLevel` derives the coarse `Level` back from the `MemoryState`.
-- `QuestionVocabFilter.filter` selects only words with `cooldown == 0` to feed into a question.
-- `PromptSetter.questionPrompt` tells Gemini to use **red/yellow** words as the answer choices and **green** (known) words to build the sentence.
+- `PromptSetter.questionPrompt` (in `lib/chat/`) tells Gemini to use **red/yellow** words as the answer choices and **green** (known) words to build the sentence. `QuestionVocabFilter.filter` (also in `lib/chat/`) selects only words with `cooldown == 0` before passing them into the prompt.
 
 `VocabularyViewmodel.handleVocabAdjustment` is the bridge from Gemini back to the database: if the word exists it applies the upgrade/downgrade and re-infers level; if it's a brand-new word (e.g. one the user flagged as unfamiliar) it adds it as a fresh red word.
+
+### Auto-update feature
+
+`lib/update/` checks GitHub releases for a newer version on startup. `UpdateRepository` fetches the latest release info; `UpdateViewModel` drives the logic; `UpdateDialog` is shown from `main.dart` if an update is available. `release_info.dart` in `lib/models/` is the data model for a release.
 
 ### Persistence
 
@@ -64,6 +67,7 @@ This is the heart of the app and lives in `lib/vocabulary/vocab_domain.dart` (pu
 
 ## Conventions & gotchas
 
+- `RetryHandler.retryHandler` (`lib/chat/retry_handler.dart`) wraps each Gemini API call in `ChatViewModel`. If you add a new model call, route it through `RetryHandler` rather than calling the SDK directly.
 - The codebase uses `print` for debugging and has scattered `//TODO:` markers (e.g. "alert user", broken-row cleanup) — these mark genuinely unfinished work.
 - `PromptSetter.reviewPrompt` deliberately does **not** mention any tool — the review model has no tools and only fills the `memoryStateUpdateResult` JSON field; the actual `updateMemoryState` function call happens in the separate third model, which reads that field from history. Keep the field name consistent across both sides if editing either.
 - `Vocab` and `Option` are mutable value classes; `VocabAdjustment` is immutable. Neither `Vocab` nor `Option` has JSON serialization — Excel I/O is hand-rolled in `ExcelRepository`.
