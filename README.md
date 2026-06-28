@@ -68,7 +68,7 @@ flutter build windows --release
 ## How to Use
 
 ### 1. Set your API key
-On first launch, go to **Settings** (gear icon) and paste your Google Gemini API key. You can also choose which Gemini model to use (default: `gemini-2.5-flash-lite`).
+On first launch, go to **Settings** (gear icon) and paste your Google Gemini API key. You can also choose which Gemini model to use (default: `gemini-3.1-flash-lite`).
 
 ### 2. Add vocabulary
 In the **Vocabulary** panel on the right, add the words you want to study. New words start at **Red** (unfamiliar).
