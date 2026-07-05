@@ -102,13 +102,12 @@ class UpdateRepository {
   Future<void> runInstallerAndExit(File installer) async {
     await Process.start(
       installer.path,
-      const [],
+      const ["/VERYSILENT", "/NORESTART", "/SUPPRESSMSGBOXES", "/SP-"],
       mode: ProcessStartMode.detached,
       runInShell: true,
     );
     exit(0);
   }
 
-  String _stripV(String tag) =>
-      tag.startsWith('v') ? tag.substring(1) : tag;
+  String _stripV(String tag) => tag.startsWith('v') ? tag.substring(1) : tag;
 }

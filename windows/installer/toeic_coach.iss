@@ -32,10 +32,10 @@ PrivilegesRequiredOverridesAllowed=dialog
 ; During an update, close the running app and relaunch it afterward so files
 ; aren't locked. Paired with the updater's "launch installer then exit".
 CloseApplications=yes
-RestartApplications=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "ChineseTraditional"; MessagesFile: "Languages\ChineseTraditional.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -53,3 +53,4 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 ; Offer to launch the app when the installer finishes (and after an update).
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Flags: nowait skipifnotsilent
