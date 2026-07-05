@@ -119,5 +119,5 @@ On launch (and from Settings), the app calls
 `https://api.github.com/repos/Superfang0726/toeic_coach/releases/latest`, reads
 the `tag_name`, compares it to its own version, and if the release is newer it
 shows the notes and offers to download the `-setup.exe` asset and run it. The
-installer (configured with `CloseApplications`/`RestartApplications`) closes the
-running app, replaces the files, and relaunches the new version.
+installer (configured with `CloseApplications`) closes the running app and
+replaces the files; its `[Run]` section relaunches the new version.

@@ -256,8 +256,8 @@ Future<void> runInstallerAndExit(File installer) async {
   it won't die when our app closes (which is the whole point).
 - `exit(0)` immediately quits the Flutter app. This is essential: Windows locks
   a running `.exe`, so our app must be gone for the installer to overwrite it.
-  Inno Setup is configured (`CloseApplications`/`RestartApplications`) to replace
-  the files and relaunch the new version.
+  Inno Setup is configured (`CloseApplications`) to close the app and replace
+  the files; its `[Run]` section relaunches the new version.
 
 ### `_stripV(...)` — tiny helper
 
@@ -728,13 +728,12 @@ OutputBaseFilename=toeic_coach-{#MyAppVersion}-setup
 
 ```ini
 CloseApplications=yes
-RestartApplications=yes
 ```
 
-- These make an in-place update work: when the updater launches this installer
-  while the app is running, Inno Setup closes the app, replaces its files, and
-  relaunches it. This is the other side of the repository's "launch installer,
-  then `exit(0)`".
+- This makes an in-place update work: when the updater launches this installer
+  while the app is running, `CloseApplications` closes the app so Inno Setup can
+  replace its files; the `[Run]` section then relaunches the new version. This is
+  the other side of the repository's "launch installer, then `exit(0)`".
 
 ```ini
 [Files]

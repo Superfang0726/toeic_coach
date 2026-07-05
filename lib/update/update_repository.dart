@@ -98,7 +98,8 @@ class UpdateRepository {
 
   /// Launches the downloaded installer detached, then exits the app so the
   /// installer can close/replace the running files. Inno Setup is configured
-  /// with CloseApplications/RestartApplications to handle the swap + relaunch.
+  /// with CloseApplications to close the running app; its [Run] section
+  /// relaunches the new version.
   Future<void> runInstallerAndExit(File installer) async {
     await Process.start(
       installer.path,
