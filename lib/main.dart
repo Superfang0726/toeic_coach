@@ -53,6 +53,10 @@ class MainApp extends StatefulWidget {
 class MainAppState extends State<MainApp> {
   bool _isDatabaseUiVisible = true;
   final UpdateViewModel _updateViewModel = UpdateViewModel();
+  // Lets us obtain a BuildContext that is a *descendant* of MaterialApp (and
+  // therefore has MaterialLocalizations) when showing the update dialog from
+  // initState — MainAppState's own `context` sits above MaterialApp.
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -64,7 +68,13 @@ class MainAppState extends State<MainApp> {
       await _updateViewModel.checkForUpdate();
       if (!mounted) return;
       if (_updateViewModel.status == UpdateStatus.available) {
-        UpdateDialog.show(context, _updateViewModel);
+        // Fetched fresh after the await and null-checked, so it's safe; the
+        // lint can't tie this non-State context to the `mounted` guard above.
+        final dialogContext = _navigatorKey.currentContext;
+        if (dialogContext != null) {
+          // ignore: use_build_context_synchronously
+          UpdateDialog.show(dialogContext, _updateViewModel);
+        }
       }
     });
   }
@@ -78,6 +88,7 @@ class MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       home: Scaffold(
