@@ -26,6 +26,22 @@ class _DatabaseUiState extends State<DatabaseUi> {
   Level _selectedLevel = Level.red;
 
   @override
+  void initState() {
+    super.initState();
+    // Rebuild whenever either field changes so the Add button can enable /
+    // disable itself based on whether both fields have input.
+    _nameController.addListener(_onInputChanged);
+    _meanController.addListener(_onInputChanged);
+  }
+
+  void _onInputChanged() => setState(() {});
+
+  // Add is only allowed when both Word and Meaning have non-whitespace input.
+  bool get _canAdd =>
+      _nameController.text.trim().isNotEmpty &&
+      _meanController.text.trim().isNotEmpty;
+
+  @override
   void dispose() {
     _nameController.dispose();
     _meanController.dispose();
@@ -157,15 +173,19 @@ class _DatabaseUiState extends State<DatabaseUi> {
                               ),
                               const SizedBox(width: 12),
                               FilledButton.icon(
-                                onPressed: () {
-                                  context.read<VocabularyViewmodel>().addVocab(
-                                    word: _nameController.text,
-                                    mean: _meanController.text,
-                                    level: _selectedLevel,
-                                  );
-                                  _nameController.clear();
-                                  _meanController.clear();
-                                },
+                                onPressed: _canAdd
+                                    ? () {
+                                        context
+                                            .read<VocabularyViewmodel>()
+                                            .addVocab(
+                                              word: _nameController.text.trim(),
+                                              mean: _meanController.text.trim(),
+                                              level: _selectedLevel,
+                                            );
+                                        _nameController.clear();
+                                        _meanController.clear();
+                                      }
+                                    : null,
                                 style: FilledButton.styleFrom(
                                   backgroundColor: kPrimary,
                                   foregroundColor: Colors.white,
