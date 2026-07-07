@@ -15,6 +15,18 @@ flutter test --name "pattern"   # run tests matching a name
 
 The UI is a two-pane `Row` (chat left, vocabulary database right), so it targets desktop/wide layouts rather than mobile.
 
+## Git workflow
+
+**Meaningful changes (features, bug fixes, refactors) must NOT be committed directly to `main`.** Before starting such a change:
+
+1. Create a branch: `git checkout -b <type>/<short-desc>` (`feat/`, `fix/`, `refactor/`, `chore/`).
+2. Commit the work on that branch.
+3. `git push -u origin <branch>` → `gh pr create` → merge back to `main` **via the GitHub PR**.
+
+Trivial changes (typos, comment tweaks) may go directly to `main`.
+
+A PreToolUse hook (`.claude/hooks/guard-main-branch.ps1`, wired in `.claude/settings.json`) is the safety net: whenever a file-writing tool (Edit/Write/NotebookEdit) runs while on `main`, it prompts the user to confirm (`permissionDecision: "ask"`). Proactively create the branch first so that prompt never appears for real work — the prompt firing means you forgot to branch. The hook script is UTF-8 **with BOM** (required so Windows PowerShell 5.1 reads its Chinese text) and forces UTF-8 stdout; keep both if you edit it.
+
 ## Architecture
 
 A Flutter app that drills TOEIC Part 5 vocabulary. It generates fill-in-the-blank questions with Google Gemini, reviews the user's answer, and uses the result to adjust each word's mastery level — persisting everything to a local Excel file.
