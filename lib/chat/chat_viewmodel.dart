@@ -30,6 +30,7 @@ class ChatViewModel with ChangeNotifier {
   String _correctLabel = '';
   Option? _selectedOption;
   String? _result;
+  String? _translation;
   bool? _isCorrect;
   List<String> _reviewItems = [];
   List<String> _memoryStateUpdateResult = [];
@@ -40,6 +41,7 @@ class ChatViewModel with ChangeNotifier {
   String get correctLabel => _correctLabel;
   Option? get selectedOption => _selectedOption;
   String? get result => _result;
+  String? get translation => _translation;
   bool? get isCorrect => _isCorrect;
   List<String> get reviewItems => _reviewItems;
   List<String> get memoryStateAdjustment => _memoryStateUpdateResult;
@@ -192,6 +194,7 @@ class ChatViewModel with ChangeNotifier {
       if (modelResponse != null) {
         final map = jsonDecode(modelResponse);
         _result = map['result'] as String;
+        _translation = map['sentenceTranslation'] as String;
         _reviewItems = ((map['review'] as List?) ?? const [])
             .map((e) => e as String)
             .toList();
