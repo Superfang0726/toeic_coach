@@ -14,8 +14,11 @@ The auto-updater relies on two conventions, so don't break them:
 ## One-time setup (do this once per machine)
 
 1. **Install Inno Setup 6** — the free Windows installer builder, from
-   <https://jrsoftware.org/isdl.php>. After install, the compiler lives at
-   `C:\Program Files (x86)\Inno Setup 6\ISCC.exe`.
+   <https://jrsoftware.org/isdl.php>. After install, the compiler `ISCC.exe`
+   lives in your Inno Setup install directory — an **all-users** install puts
+   it at `C:\Program Files (x86)\Inno Setup 6\ISCC.exe`, while a **per-user**
+   install puts it at `%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe`. Use
+   whichever matches how you installed it in the compile step below.
 2. **Install the GitHub CLI** — <https://cli.github.com/> — then authenticate
    once:
    ```powershell
@@ -62,6 +65,9 @@ Pass the same version to Inno Setup's compiler:
 ```powershell
 & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.2.0 windows\installer\toeic_coach.iss
 ```
+
+If you did a per-user install, point it at the LocalAppData path instead:
+`& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.2.0 windows\installer\toeic_coach.iss`.
 
 This produces `dist\toeic_coach-0.2.0-setup.exe`.
 
