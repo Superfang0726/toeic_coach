@@ -199,6 +199,7 @@ class _ChatUiState extends State<ChatUi> {
     // Prefer the model's structured flag; fall back to the wrong-answer
     // message heuristic ("錯誤") only if the flag is missing.
     final bool isCorrect = _chatViewModel.isCorrect ?? !result.contains('錯誤');
+    final String translation = _chatViewModel.translation ?? '';
     // Jump to the bottom once when the review first appears. If the content is
     // shorter than the viewport maxScrollExtent is 0, so this is a no-op and the
     // content simply fills from the top.
@@ -328,6 +329,9 @@ class _ChatUiState extends State<ChatUi> {
                                     (e) => _buildReviewBullet(e),
                                   ),
                                 ],
+                                // Sentence translation
+                                const _ReviewHeading('整句翻譯'),
+                                _buildReviewBullet(translation),
                                 // Memory-state adjustments.
                                 const _ReviewHeading('記憶狀態調整'),
                                 ..._chatViewModel.memoryStateAdjustment.map(

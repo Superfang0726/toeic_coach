@@ -80,6 +80,10 @@ class GeminiRepository {
                   "One short sentence in traditional chinese telling user whether the answer is correct, and if wrong, which option is the correct answer. No explanation here.",
               nullable: false,
             ),
+            'sentenceTranslation': Schema.string(
+              description: "Traslation of the sentence in traditional chinese",
+              nullable: false,
+            ),
             'review': Schema.array(
               items: Schema.string(
                 description:
@@ -91,7 +95,8 @@ class GeminiRepository {
               items: Schema.object(
                 properties: {
                   'word': Schema.string(
-                    description: 'The vocabulary word whose memoryState changes',
+                    description:
+                        'The vocabulary word whose memoryState changes',
                     nullable: false,
                   ),
                   'adjustment': Schema.enumString(
@@ -105,7 +110,11 @@ class GeminiRepository {
               ),
             ),
           },
-          requiredProperties: ['result', 'memoryStateUpdateResult'],
+          requiredProperties: [
+            'result',
+            'memoryStateUpdateResult',
+            'sentenceTranslation',
+          ],
         ),
       ),
     );
