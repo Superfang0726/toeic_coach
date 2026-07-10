@@ -317,9 +317,7 @@ class _VocabListItemState extends State<VocabListItem> {
     // If constructed already in edit mode, focus the word field just like
     // when entering edit mode via didUpdateWidget below.
     if (widget.isEditing) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _wordFocusNode.requestFocus(),
-      );
+      _focusWordField();
     }
   }
 
@@ -332,9 +330,7 @@ class _VocabListItemState extends State<VocabListItem> {
     // focus the word field when entering edit mode.
     if (widget.isEditing && !oldWidget.isEditing) {
       _resetControllers();
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _wordFocusNode.requestFocus(),
-      );
+      _focusWordField();
     } else if (!widget.isEditing && oldWidget.isEditing) {
       _resetControllers();
     }
@@ -343,6 +339,12 @@ class _VocabListItemState extends State<VocabListItem> {
   void _resetControllers() {
     _wordController.text = widget.vocab.word;
     _meanController.text = widget.vocab.mean;
+  }
+
+  void _focusWordField() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _wordFocusNode.requestFocus();
+    });
   }
 
   @override

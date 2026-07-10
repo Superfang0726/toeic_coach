@@ -115,6 +115,24 @@ void main() {
     expect((calls['saved'] as Vocab?)?.word, 'banana');
   });
 
+  testWidgets('save button is disabled when the mean field is emptied',
+      (tester) async {
+    await _pumpItem(tester, isEditing: true, isAnyEditing: true);
+    await tester.enterText(find.byType(TextField).last, '   ');
+    await tester.pump();
+    final IconButton save =
+        tester.widget(find.widgetWithIcon(IconButton, Icons.check));
+    expect(save.onPressed, isNull);
+  });
+
+  testWidgets('pressing Enter in the mean field saves', (tester) async {
+    final calls = await _pumpItem(tester, isEditing: true, isAnyEditing: true);
+    await tester.enterText(find.byType(TextField).last, '香蕉汁');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect((calls['saved'] as Vocab?)?.mean, '香蕉汁');
+  });
+
   testWidgets('pressing cancel calls onCancel and never onSave',
       (tester) async {
     final calls = await _pumpItem(tester, isEditing: true, isAnyEditing: true);
