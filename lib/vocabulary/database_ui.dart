@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // LogicalKeyboardKey
 import 'package:provider/provider.dart';
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/store/app_store.dart';
@@ -211,6 +212,11 @@ class _DatabaseUiState extends State<DatabaseUi> {
                       itemBuilder: (context, index) {
                         return VocabListItem(
                           vocab: vocabs[index],
+                          isEditing: false,
+                          isAnyEditing: false,
+                          onStartEdit: () {},
+                          onSave: (_) {},
+                          onCancel: () {},
                           onDelete: () => context
                               .read<VocabularyViewmodel>()
                               .deleteVocab(vocabs[index]),
@@ -251,7 +257,26 @@ class VocabListItem extends StatefulWidget {
   final Vocab vocab;
   final VoidCallback onDelete;
 
-  const VocabListItem({super.key, required this.vocab, required this.onDelete});
+  /// True when THIS row is the one being edited.
+  final bool isEditing;
+
+  /// True when ANY row is being edited (used to suppress delete-on-hover).
+  final bool isAnyEditing;
+
+  final VoidCallback onStartEdit;
+  final ValueChanged<Vocab> onSave;
+  final VoidCallback onCancel;
+
+  const VocabListItem({
+    super.key,
+    required this.vocab,
+    required this.onDelete,
+    required this.isEditing,
+    required this.isAnyEditing,
+    required this.onStartEdit,
+    required this.onSave,
+    required this.onCancel,
+  });
 
   @override
   State<VocabListItem> createState() => _VocabListItemState();
@@ -259,6 +284,56 @@ class VocabListItem extends StatefulWidget {
 
 class _VocabListItemState extends State<VocabListItem> {
   bool _isHovered = false;
+  late final TextEditingController _wordController;
+  late final TextEditingController _meanController;
+  final FocusNode _wordFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _wordController = TextEditingController(text: widget.vocab.word);
+    _meanController = TextEditingController(text: widget.vocab.mean);
+    // Rebuild while editing so the save button enables/disables live.
+    _wordController.addListener(_onEditChanged);
+    _meanController.addListener(_onEditChanged);
+    // If constructed already in edit mode, focus the word field just like
+    // when entering edit mode via didUpdateWidget below.
+    if (widget.isEditing) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _wordFocusNode.requestFocus(),
+      );
+    }
+  }
+
+  void _onEditChanged() => setState(() {});
+
+  @override
+  void didUpdateWidget(covariant VocabListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Seed the fields from the current vocab whenever edit mode toggles, and
+    // focus the word field when entering edit mode.
+    if (widget.isEditing && !oldWidget.isEditing) {
+      _resetControllers();
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _wordFocusNode.requestFocus(),
+      );
+    } else if (!widget.isEditing && oldWidget.isEditing) {
+      _resetControllers();
+    }
+  }
+
+  void _resetControllers() {
+    _wordController.text = widget.vocab.word;
+    _meanController.text = widget.vocab.mean;
+  }
+
+  @override
+  void dispose() {
+    _wordController.dispose();
+    _meanController.dispose();
+    _wordFocusNode.dispose();
+    super.dispose();
+  }
 
   Color get _levelColor {
     switch (widget.vocab.level) {
@@ -271,15 +346,48 @@ class _VocabListItemState extends State<VocabListItem> {
     }
   }
 
+  // Mirrors the "Add" button rule: both fields non-empty after trimming.
+  bool get _canSave =>
+      _wordController.text.trim().isNotEmpty &&
+      _meanController.text.trim().isNotEmpty;
+
+  void _save() {
+    if (!_canSave) return;
+    widget.onSave(
+      widget.vocab.copyWith(
+        word: _wordController.text.trim(),
+        mean: _meanController.text.trim(),
+      ),
+    );
+  }
+
+  // Compact outlined field for inline editing.
+  InputDecoration _fieldDecoration() {
+    OutlineInputBorder border(Color color, double width) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: color, width: width),
+    );
+    return InputDecoration(
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      filled: true,
+      fillColor: kSurface,
+      border: border(kBorder, 1),
+      enabledBorder: border(kBorder, 1),
+      focusedBorder: border(kPrimary, 2),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool highlighted = widget.isEditing || _isHovered;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: _isHovered ? kPrimaryLight : kSurface,
+          color: highlighted ? kPrimaryLight : kSurface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -296,57 +404,114 @@ class _VocabListItemState extends State<VocabListItem> {
               // Left 4px color strip based on level.
               Container(width: 4, color: _levelColor),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.vocab.word,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: kTextPrimary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          widget.vocab.mean,
-                          style: const TextStyle(color: kTextSecondary),
-                        ),
-                      ),
-                      // Right-side memory-state dot (gradient low -> high).
-                      Container(
-                        width: 10,
-                        height: 10,
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: kMemoryStateGradient[widget
-                              .vocab
-                              .memoryState
-                              .index],
-                        ),
-                      ),
-                      // Reserve width so the row doesn't jump on hover.
-                      SizedBox(
-                        width: 40,
-                        child: _isHovered
-                            ? IconButton(
-                                icon: const Icon(Icons.delete, color: kError),
-                                onPressed: widget.onDelete,
-                              )
-                            : null,
-                      ),
-                    ],
-                  ),
-                ),
+                child: widget.isEditing ? _buildEditRow() : _buildDisplayRow(),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // Normal mode: tapping anywhere (except the delete button) starts editing.
+  Widget _buildDisplayRow() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.onStartEdit,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.vocab.word,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: kTextPrimary,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                widget.vocab.mean,
+                style: const TextStyle(color: kTextSecondary),
+              ),
+            ),
+            // Right-side memory-state dot (gradient low -> high).
+            Container(
+              width: 10,
+              height: 10,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: kMemoryStateGradient[widget.vocab.memoryState.index],
+              ),
+            ),
+            // Reserve width so the row doesn't jump on hover. The delete icon
+            // is suppressed while any row is being edited.
+            SizedBox(
+              width: 40,
+              child: (_isHovered && !widget.isAnyEditing)
+                  ? IconButton(
+                      icon: const Icon(Icons.delete, color: kError),
+                      onPressed: widget.onDelete,
+                    )
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Edit mode: word/mean become fields; Esc cancels; Enter saves.
+  Widget _buildEditRow() {
+    return Focus(
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.escape) {
+          widget.onCancel();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _wordController,
+                focusNode: _wordFocusNode,
+                decoration: _fieldDecoration(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: kTextPrimary,
+                ),
+                onSubmitted: (_) => _save(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _meanController,
+                decoration: _fieldDecoration(),
+                style: const TextStyle(color: kTextPrimary),
+                onSubmitted: (_) => _save(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.check, color: kSuccess),
+              tooltip: 'Save',
+              onPressed: _canSave ? _save : null,
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: kTextSecondary),
+              tooltip: 'Cancel',
+              onPressed: widget.onCancel,
+            ),
+          ],
         ),
       ),
     );
