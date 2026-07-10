@@ -26,6 +26,9 @@ class _DatabaseUiState extends State<DatabaseUi> {
   final TextEditingController _meanController = TextEditingController();
   Level _selectedLevel = Level.red;
 
+  // id of the row currently being inline-edited, or null when none.
+  String? _editingVocabId;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +39,19 @@ class _DatabaseUiState extends State<DatabaseUi> {
   }
 
   void _onInputChanged() => setState(() {});
+
+  // Enter edit mode only when nothing else is being edited (one at a time).
+  void _startEdit(String id) {
+    if (_editingVocabId != null) return;
+    setState(() => _editingVocabId = id);
+  }
+
+  void _cancelEdit() => setState(() => _editingVocabId = null);
+
+  void _saveEdit(Vocab updated) {
+    context.read<VocabularyViewmodel>().updateVocab(updated);
+    setState(() => _editingVocabId = null);
+  }
 
   // Add is only allowed when both Word and Meaning have non-whitespace input.
   bool get _canAdd =>
@@ -210,16 +226,18 @@ class _DatabaseUiState extends State<DatabaseUi> {
                     child: ListView.builder(
                       itemCount: vocabs.length,
                       itemBuilder: (context, index) {
+                        final Vocab vocab = vocabs[index];
                         return VocabListItem(
-                          vocab: vocabs[index],
-                          isEditing: false,
-                          isAnyEditing: false,
-                          onStartEdit: () {},
-                          onSave: (_) {},
-                          onCancel: () {},
+                          key: ValueKey(vocab.id),
+                          vocab: vocab,
+                          isEditing: _editingVocabId == vocab.id,
+                          isAnyEditing: _editingVocabId != null,
+                          onStartEdit: () => _startEdit(vocab.id),
+                          onSave: _saveEdit,
+                          onCancel: _cancelEdit,
                           onDelete: () => context
                               .read<VocabularyViewmodel>()
-                              .deleteVocab(vocabs[index]),
+                              .deleteVocab(vocab),
                         );
                       },
                     ),
