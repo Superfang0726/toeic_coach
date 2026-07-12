@@ -34,6 +34,7 @@ class ChatViewModel with ChangeNotifier {
   bool? _isCorrect;
   List<String> _reviewItems = [];
   List<String> _memoryStateUpdateResult = [];
+  List<String> _usedGreenWords = [];
 
   List<String> get unfamiliarWords => _unfamiliarWords;
   String get sentence => _sentence;
@@ -99,6 +100,12 @@ class ChatViewModel with ChangeNotifier {
 
     _vocabularyViewModel.decreaseCooldown();
 
+    final List<String> usedWords = [
+      ..._options.map((option) => option.word),
+      ..._usedGreenWords,
+    ];
+    _vocabularyViewModel.applyCooldownForUsedWords(usedWords);
+
     final List<VocabAdjustment?> functionCallsResponse = await _geminiRepository
         .updateMemoryState(_history);
 
@@ -151,6 +158,9 @@ class ChatViewModel with ChangeNotifier {
           return Option(label: k, word: word);
         }).toList();
         _correctLabel = map['answer'] as String;
+        _usedGreenWords = ((map['usedGreenWords'] as List?) ?? const [])
+            .map((e) => e as String)
+            .toList();
 
         chatState = ChatState.displayingQuestion;
         notifyListeners();

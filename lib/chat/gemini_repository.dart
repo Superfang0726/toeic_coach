@@ -61,8 +61,20 @@ class GeminiRepository {
                   'A sentence in TOEIC Part 5 pattern containing exactly one blank written as "___", which only the correct choice can fill',
               nullable: false,
             ),
+            'usedGreenWords': Schema.array(
+              items: Schema.string(
+                description:
+                    'A green word from the provided vocabulary table that was '
+                    'used to construct the sentence, reported using the EXACT '
+                    'form written in the table — not the inflected form used in '
+                    'the sentence. E.g. if the table lists "announce" but the '
+                    'sentence uses "announced", report "announce"; if the table '
+                    'lists "meeting", report "meeting", never "meet". Just the word.',
+                nullable: false,
+              ),
+            ),
           },
-          requiredProperties: ['options', 'answer', 'sentence'],
+          requiredProperties: ['options', 'answer', 'sentence', 'usedGreenWords'],
         ),
       ),
     );

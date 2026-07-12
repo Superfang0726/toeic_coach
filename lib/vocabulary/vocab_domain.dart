@@ -80,6 +80,20 @@ class VocabDomain {
         .toList();
   }
 
+  static List<Vocab> applyCooldownForUsedWords(
+    List<Vocab> currentVocabs,
+    Set<String> usedWords,
+  ) {
+    final lowered = usedWords.map((w) => w.toLowerCase()).toSet();
+    return currentVocabs
+        .map(
+          (vocab) => lowered.contains(vocab.word.toLowerCase())
+              ? vocab.copyWith(cooldown: inferCooldown(vocab.memoryState))
+              : vocab,
+        )
+        .toList();
+  }
+
   static Level inferLevel(MemoryState memoryState) {
     switch (memoryState) {
       case MemoryState.redHigh:
