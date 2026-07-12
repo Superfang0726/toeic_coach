@@ -127,6 +127,7 @@ class ChatViewModel with ChangeNotifier {
     //init member variables
     _retryTimes = 0;
     _unfamiliarWords = [];
+    _selectedOption = null;
     _errorMessage = null;
 
     //Generating page

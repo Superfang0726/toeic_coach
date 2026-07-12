@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 flutter pub get                 # install dependencies
 flutter run                     # run app (desktop: -d windows / macos / linux)
 flutter analyze                 # lint (uses flutter_lints via analysis_options.yaml)
-flutter test                    # run all tests (no tests exist yet)
+flutter test                    # run all tests (test/ has unit tests; no mocking lib — see Testing)
 flutter test test/foo_test.dart # run a single test file
 flutter test --name "pattern"   # run tests matching a name
 ```
@@ -84,6 +84,10 @@ This is the heart of the app and lives in `lib/vocabulary/vocab_domain.dart` (pu
 - The codebase uses `print` for debugging and has scattered `//TODO:` markers (e.g. "alert user", broken-row cleanup) — these mark genuinely unfinished work.
 - `PromptSetter.reviewPrompt` deliberately does **not** mention any tool — the review model has no tools and only fills the `memoryStateUpdateResult` JSON field; the actual `updateMemoryState` function call happens in the separate third model, which reads that field from history. Keep the field name consistent across both sides if editing either.
 - `Vocab` and `Option` are mutable value classes; `VocabAdjustment` is immutable. Neither `Vocab` nor `Option` has JSON serialization — Excel I/O is hand-rolled in `ExcelRepository`.
+
+## Testing
+
+Tests live in `test/` and run with `flutter test`. There is **no mocking library** (no mockito/mocktail) — instead, tests use hand-written **Fakes that subclass the real repository** and override only the I/O method, e.g. `FakeExcelRepository extends ExcelRepository` overriding `writeExcel` to capture the written list in memory. Domain logic (`vocab_domain.dart`) and pure helpers (`isVersionNewer`) are covered directly as pure-function tests. Follow the Fake pattern for new ViewModel tests rather than adding a mocking dependency.
 
 ## Active task specs
 
