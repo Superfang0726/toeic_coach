@@ -116,4 +116,15 @@ class VocabularyViewmodel {
     store.updateVocabularyStore(updatedVocab);
     excelRepository.writeExcel(updatedVocab);
   }
+
+  void applyCooldownForUsedWords(List<String> words) {
+    List<Vocab> updatedVocab = VocabDomain.applyCooldownForUsedWords(
+      store.vocabulary,
+      words.toSet(),
+    );
+
+    //write in
+    store.updateVocabularyStore(updatedVocab);
+    excelRepository.writeExcel(updatedVocab);
+  }
 }
