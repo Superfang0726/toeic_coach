@@ -69,5 +69,20 @@ void main() {
       expect(result[1].cooldown, 4);
       expect(result[1].memoryState, MemoryState.redLow);
     });
+
+    test('cools multiple words simultaneously', () {
+      final input = [
+        vocab(word: 'apple', memoryState: MemoryState.green, level: Level.green),
+        vocab(word: 'audit', memoryState: MemoryState.redHigh, level: Level.red),
+        vocab(word: 'banana', memoryState: MemoryState.redLow, level: Level.red),
+      ];
+      final result = VocabDomain.applyCooldownForUsedWords(input, {'apple', 'audit'});
+      // green -> cooldown 2
+      expect(result[0].cooldown, 2);
+      // redHigh -> cooldown 5
+      expect(result[1].cooldown, 5);
+      // banana (not used) -> cooldown 0
+      expect(result[2].cooldown, 0);
+    });
   });
 }
