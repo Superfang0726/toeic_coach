@@ -19,7 +19,7 @@ Workflow:
 3. Select one of the four answer choices as the correct answer, and place it at a randomly chosen position among A, B, C and D.
 4. After selecting the correct answer, construct the question sentence using as many relevant green words as possible. The sentence must contain exactly one blank written as "___", and the correct answer must fit it naturally and grammatically.
 5. Exactly one choice may fit the blank: the other three choices must be clearly wrong in this sentence, either by meaning or by usage.
-6. List in "usedGreenWords" every green word from the table above that you actually used to construct the sentence, spelled exactly as it appears in the table. If you used no green words, return an empty array.""",
+6. List in "usedGreenWords" every green word from the table above that you actually used to construct the sentence. Report each word using the EXACT form written in the table, not the form as it appears in the sentence. If the sentence inflects a word (tense, plural, participle, etc.), still report the table's original form: e.g. if the table lists "announce" but the sentence uses "announced", report "announce". Conversely, never strip a word to a different form than the table's entry: if the table lists "meeting" (a noun), report "meeting", never "meet". If you used no green words, return an empty array.""",
     );
     return buffer.toString();
   }

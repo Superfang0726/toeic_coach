@@ -64,9 +64,12 @@ class GeminiRepository {
             'usedGreenWords': Schema.array(
               items: Schema.string(
                 description:
-                    'A green word taken from the provided vocabulary table that '
-                    'was used to construct the sentence, spelled exactly as it '
-                    'appears in the table. Just the word.',
+                    'A green word from the provided vocabulary table that was '
+                    'used to construct the sentence, reported using the EXACT '
+                    'form written in the table — not the inflected form used in '
+                    'the sentence. E.g. if the table lists "announce" but the '
+                    'sentence uses "announced", report "announce"; if the table '
+                    'lists "meeting", report "meeting", never "meet". Just the word.',
                 nullable: false,
               ),
             ),
