@@ -63,7 +63,7 @@ This is the heart of the app and lives in `lib/vocabulary/vocab_domain.dart` (pu
 
 - Each `Vocab` has a `Level` (red / yellow / green) and a finer `MemoryState` (redLow → redMedium → redHigh → yellowLow → yellowHigh → green).
 - `upgrade`/`downgrade` move a word one step along that chain (downgrades are punitive — a wrong yellow word drops straight to redLow). `inferLevel` derives the coarse `Level` back from the `MemoryState`.
-- `PromptSetter.questionPrompt` (in `lib/chat/`) tells Gemini to use **red/yellow** words as the answer choices and **green** (known) words to build the sentence. `QuestionVocabFilter.filter` (also in `lib/chat/`) selects only words with `cooldown == 0` before passing them into the prompt.
+- `PromptSetter.questionPrompt` (in `lib/chat/`) tells Gemini to use **red/yellow** words as the answer choices and **green** (known) words to build the sentence. `QuestionVocabSelector` (also in `lib/chat/`) selects only words with `cooldown == 0` and shuffles them before passing them into the prompt.
 
 `VocabularyViewmodel.handleVocabAdjustment` is the bridge from Gemini back to the database: if the word exists it applies the upgrade/downgrade and re-infers level; if it's a brand-new word (e.g. one the user flagged as unfamiliar) it adds it as a fresh red word.
 

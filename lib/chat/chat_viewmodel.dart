@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:toeic_coach/chat/gemini_repository.dart';
 import 'package:toeic_coach/chat/prompt_setter.dart';
-import 'package:toeic_coach/chat/question_vocab_filter.dart';
+import 'package:toeic_coach/chat/question_vocab_selector.dart';
 import 'package:toeic_coach/chat/retry_handler.dart';
 import 'package:toeic_coach/models/option.dart';
 import 'package:toeic_coach/models/vocab.dart';
@@ -67,9 +67,10 @@ class ChatViewModel with ChangeNotifier {
   }
 
   Future<String> _generateQuestion() async {
-    List<Vocab> filteredVocabulary = QuestionVocabFilter.filter(
+    List<Vocab> filteredVocabulary = QuestionVocabSelector.filter(
       _store.vocabulary,
     );
+    filteredVocabulary = QuestionVocabSelector.shuffle(filteredVocabulary);
     String prompt = PromptSetter.questionPrompt(filteredVocabulary);
     final (response, history) = await _geminiRepository.generateQuestion(
       prompt,
