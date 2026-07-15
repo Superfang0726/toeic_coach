@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:toeic_coach/chat/question_vocab_selector.dart';
+import 'package:toeic_coach/models/option.dart';
 import 'package:toeic_coach/models/vocab.dart';
 
 Vocab vocab({
@@ -185,6 +186,27 @@ void main() {
         leveled(word: 'g2', level: Level.green, memoryState: MemoryState.green),
       ]);
       expect(result.map((v) => v.word).toList(), ['g1', 'g2']);
+    });
+  });
+
+  group('QuestionVocabSelector.resolveAnswerLabel', () {
+    final options = [
+      Option(label: 'A', word: 'alpha'),
+      Option(label: 'B', word: 'bravo'),
+      Option(label: 'C', word: 'charlie'),
+      Option(label: 'D', word: 'delta'),
+    ];
+
+    test('returns the label whose word matches', () {
+      expect(QuestionVocabSelector.resolveAnswerLabel(options, 'charlie'), 'C');
+    });
+
+    test('matches case-insensitively', () {
+      expect(QuestionVocabSelector.resolveAnswerLabel(options, 'BRAVO'), 'B');
+    });
+
+    test('returns null when no option holds the word', () {
+      expect(QuestionVocabSelector.resolveAnswerLabel(options, 'echo'), isNull);
     });
   });
 }

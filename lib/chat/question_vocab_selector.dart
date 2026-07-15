@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:toeic_coach/models/option.dart';
 import 'package:toeic_coach/models/vocab.dart';
 
 class QuestionVocabSelector {
@@ -47,4 +48,13 @@ class QuestionVocabSelector {
 
   static List<Vocab> greenPool(List<Vocab> vocabulary) =>
       vocabulary.where((v) => v.level == Level.green).toList();
+
+  static String? resolveAnswerLabel(List<Option> options, String answerWord) {
+    for (final option in options) {
+      if (option.word.toLowerCase() == answerWord.toLowerCase()) {
+        return option.label;
+      }
+    }
+    return null;
+  }
 }
