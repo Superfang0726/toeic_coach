@@ -125,4 +125,32 @@ void main() {
 
     expect(store.vocabulary.single.nextDueRound, 0);
   });
+
+  test('handleVocabAdjustment adds an unknown word as red on downgrade', () {
+    final store = Store();
+    store.updateVocabularyStore([]);
+    final excel = FakeExcelRepository();
+    final vm = makeViewmodel(store, excel, FakeSharedPreferencesRepository());
+
+    vm.handleVocabAdjustment(
+      VocabAdjustment(word: 'novel', mean: '新字', adjustment: Adjustment.downgrade),
+    );
+
+    final added = store.vocabulary.single;
+    expect(added.word, 'novel');
+    expect(added.level, Level.red);
+  });
+
+  test('handleVocabAdjustment ignores an unknown word answered correctly (upgrade)', () {
+    final store = Store();
+    store.updateVocabularyStore([]);
+    final excel = FakeExcelRepository();
+    final vm = makeViewmodel(store, excel, FakeSharedPreferencesRepository());
+
+    vm.handleVocabAdjustment(
+      VocabAdjustment(word: 'known', mean: '會的字', adjustment: Adjustment.upgrade),
+    );
+
+    expect(store.vocabulary, isEmpty);
+  });
 }

@@ -106,14 +106,16 @@ class VocabularyViewmodel {
   void handleVocabAdjustment(VocabAdjustment vocabAdjustment) {
     if (VocabDomain.checkVocabExist(store.vocabulary, vocabAdjustment.word)) {
       applyVocabAdjustment(vocabAdjustment);
-    } else {
-      //TODO: filter those upgrade adjustment not to add in database
+    } else if (vocabAdjustment.adjustment == Adjustment.downgrade) {
       addVocab(
         word: vocabAdjustment.word,
         mean: vocabAdjustment.mean,
         level: Level.red,
       );
     }
+    // An unknown word answered correctly (upgrade) is intentionally not added:
+    // novel-mode questions should only capture words the user got wrong or
+    // flagged as unfamiliar, not ones they already know.
   }
 
   void incrementRound() {
