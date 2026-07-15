@@ -148,7 +148,8 @@ Future<ReleaseInfo?> fetchLatestRelease() async {
 - A release can have many uploaded files (`assets`). `?? []` defaults to an
   empty list if the field is missing, so the loop is always safe.
 - We pick the asset whose filename ends in **`-setup.exe`** — this is the naming
-  convention the release checklist enforces (see `docs/RELEASING.md`). That
+  convention the release checklist enforces (see the `releasing-toeic-coach`
+  skill in `.claude/skills/`). That
   decouples us from the exact version in the filename.
 - `browser_download_url` is the direct link we'll download later. No installer
   asset → nothing to update to → `null`.
@@ -751,22 +752,23 @@ to launch the app when the installer finishes.
 
 ---
 
-## 10. The release checklist — `docs/RELEASING.md`
+## 10. The release checklist — `releasing-toeic-coach` skill
 
 Not code — the human procedure for cutting a release: bump version → build →
-make installer → commit → tag → `gh release create` with the installer attached.
-The two conventions everything depends on:
+make installer → commit → tag → draft notes → `gh release create` with the
+installer attached. The two conventions everything depends on:
 
 1. tag = `vX.Y.Z`
 2. installer asset name ends in `-setup.exe`
 
-Read that file directly when you publish; it's written to be copy-paste.
+Lives in `.claude/skills/releasing-toeic-coach/SKILL.md`; it's written to be
+followed step by step when you publish.
 
 ---
 
 ## How it all fits together (the full loop)
 
-1. You publish `v0.2.0` per `RELEASING.md` — a GitHub Release with
+1. You publish `v0.2.0` per the `releasing-toeic-coach` skill — a GitHub Release with
    `toeic_coach-0.2.0-setup.exe` attached.
 2. A user on `0.1.0` launches the app. `main.dart`'s post-frame callback calls
    `UpdateViewModel.checkForUpdate()`.

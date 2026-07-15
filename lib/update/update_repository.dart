@@ -37,7 +37,7 @@ class UpdateRepository {
       final tag = (json['tag_name'] as String?)?.trim();
       if (tag == null || tag.isEmpty) return null;
 
-      // Find the installer asset by naming convention (see docs/RELEASING.md).
+      // Find the installer asset by naming convention (see .claude/skills/releasing-toeic-coach).
       final assets = (json['assets'] as List<dynamic>? ?? []);
       String? installerUrl;
       for (final asset in assets) {

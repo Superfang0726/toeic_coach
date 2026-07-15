@@ -1,7 +1,7 @@
 ; Inno Setup script for TOEIC Coach (Windows).
 ; Compile with the version passed in from the build command, e.g.:
 ;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.2.0 windows\installer\toeic_coach.iss
-; See docs/RELEASING.md for the full release checklist.
+; See .claude/skills/releasing-toeic-coach for the full release checklist.
 
 #ifndef MyAppVersion
   #define MyAppVersion "0.0.0"

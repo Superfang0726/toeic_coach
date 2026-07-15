@@ -33,7 +33,7 @@ migrate_working_dir/
 /build/
 /coverage/
 
-# Release installer output (see docs/RELEASING.md)
+# Release installer output (see .claude/skills/releasing-toeic-coach)
 /dist/
 
 # Symbolication related
