@@ -105,14 +105,28 @@ void main() {
       expect(QuestionVocabSelector.pickAnswerWord([], 10), isNull);
     });
 
-    test('random tiebreak returns one of the tied maxima', () {
+    test('a word due exactly this round is eligible', () {
+      final result = QuestionVocabSelector.pickAnswerWord([
+        leveled(word: 'due-now', level: Level.red, memoryState: MemoryState.redLow, nextDueRound: 10),
+      ], 10);
+      expect(result?.word, 'due-now');
+    });
+
+    test('random tiebreak eventually returns every tied maximum', () {
       final input = [
         leveled(word: 'a', level: Level.red, memoryState: MemoryState.redLow, nextDueRound: 0),
         leveled(word: 'b', level: Level.red, memoryState: MemoryState.redLow, nextDueRound: 0),
         leveled(word: 'c', level: Level.red, memoryState: MemoryState.redLow, nextDueRound: 0),
       ];
-      final result = QuestionVocabSelector.pickAnswerWord(input, 5, random: Random(1));
-      expect(['a', 'b', 'c'].contains(result?.word), isTrue);
+      final chosen = <String>{};
+      for (var seed = 0; seed < 20; seed++) {
+        chosen.add(
+          QuestionVocabSelector.pickAnswerWord(input, 5, random: Random(seed))!.word,
+        );
+      }
+      // Every tied word is reachable — proving the pick is randomised among
+      // ties, not fixed to input order.
+      expect(chosen, {'a', 'b', 'c'});
     });
 
     test('a strictly-maximum word is always chosen regardless of random', () {
