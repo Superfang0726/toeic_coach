@@ -154,4 +154,37 @@ void main() {
       }
     });
   });
+
+  group('QuestionVocabSelector.distractorPool', () {
+    test('keeps red/yellow words and excludes the answer', () {
+      final answer = leveled(word: 'answer', level: Level.red, memoryState: MemoryState.redLow);
+      final result = QuestionVocabSelector.distractorPool([
+        answer,
+        leveled(word: 'red2', level: Level.red, memoryState: MemoryState.redLow),
+        leveled(word: 'yellow1', level: Level.yellow, memoryState: MemoryState.yellowLow),
+        leveled(word: 'green1', level: Level.green, memoryState: MemoryState.green),
+      ], answer);
+      expect(result.map((v) => v.word).toList(), ['red2', 'yellow1']);
+    });
+
+    test('matches the answer case-insensitively when excluding it', () {
+      final answer = leveled(word: 'Answer', level: Level.red, memoryState: MemoryState.redLow);
+      final result = QuestionVocabSelector.distractorPool([
+        leveled(word: 'answer', level: Level.red, memoryState: MemoryState.redLow),
+        leveled(word: 'other', level: Level.red, memoryState: MemoryState.redLow),
+      ], answer);
+      expect(result.map((v) => v.word).toList(), ['other']);
+    });
+  });
+
+  group('QuestionVocabSelector.greenPool', () {
+    test('keeps only green words', () {
+      final result = QuestionVocabSelector.greenPool([
+        leveled(word: 'g1', level: Level.green, memoryState: MemoryState.green),
+        leveled(word: 'r1', level: Level.red, memoryState: MemoryState.redLow),
+        leveled(word: 'g2', level: Level.green, memoryState: MemoryState.green),
+      ]);
+      expect(result.map((v) => v.word).toList(), ['g1', 'g2']);
+    });
+  });
 }

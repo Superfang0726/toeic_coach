@@ -35,4 +35,16 @@ class QuestionVocabSelector {
     tied.shuffle(random);
     return tied.first;
   }
+
+  static List<Vocab> distractorPool(List<Vocab> vocabulary, Vocab answer) =>
+      vocabulary
+          .where(
+            (v) =>
+                (v.level == Level.red || v.level == Level.yellow) &&
+                v.word.toLowerCase() != answer.word.toLowerCase(),
+          )
+          .toList();
+
+  static List<Vocab> greenPool(List<Vocab> vocabulary) =>
+      vocabulary.where((v) => v.level == Level.green).toList();
 }
