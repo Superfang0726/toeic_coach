@@ -11,7 +11,7 @@ Vocab _sampleVocab() => const Vocab(
       mean: '蘋果',
       level: Level.red,
       memoryState: MemoryState.redLow,
-      cooldown: 0,
+      nextDueRound: 0,
     );
 
 /// Pumps a single VocabListItem and records callback invocations.

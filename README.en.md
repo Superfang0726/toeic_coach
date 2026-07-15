@@ -16,7 +16,7 @@ A Flutter desktop app that drills TOEIC Part 5 vocabulary using AI-generated fil
 ### Spaced-Repetition Mastery Tracking
 - Each word has a mastery level: **Red** (unfamiliar) → **Yellow** (learning) → **Green** (known).
 - Correct answers upgrade a word; wrong answers push it back (wrong yellow words drop straight to red).
-- A cooldown system prevents the same word from appearing too frequently.
+- A spaced review-round system prevents the same word from appearing too frequently.
 
 ### Detailed AI Review
 - After answering, Gemini explains why each option is correct or incorrect.

@@ -6,32 +6,40 @@ import 'package:toeic_coach/models/vocab.dart';
 
 Vocab vocab({
   required String word,
-  int cooldown = 0,
+  int nextDueRound = 0,
 }) => Vocab(
       id: word,
       word: word,
       mean: '',
       level: Level.red,
       memoryState: MemoryState.redLow,
-      cooldown: cooldown,
+      nextDueRound: nextDueRound,
     );
 
 void main() {
   group('QuestionVocabSelector.filter', () {
-    test('keeps only words with cooldown == 0', () {
+    test('keeps only words with nextDueRound <= currentRound', () {
       final result = QuestionVocabSelector.filter([
-        vocab(word: 'apple', cooldown: 0),
-        vocab(word: 'banana', cooldown: 2),
-        vocab(word: 'cherry', cooldown: 0),
-      ]);
+        vocab(word: 'apple', nextDueRound: 0),
+        vocab(word: 'banana', nextDueRound: 12),
+        vocab(word: 'cherry', nextDueRound: 3),
+      ], 10);
 
       expect(result.map((v) => v.word).toList(), ['apple', 'cherry']);
     });
 
-    test('returns an empty list when all words are on cooldown', () {
+    test('a word due exactly this round is eligible', () {
       final result = QuestionVocabSelector.filter([
-        vocab(word: 'apple', cooldown: 1),
-      ]);
+        vocab(word: 'apple', nextDueRound: 10),
+      ], 10);
+
+      expect(result.map((v) => v.word).toList(), ['apple']);
+    });
+
+    test('returns an empty list when every word is due in the future', () {
+      final result = QuestionVocabSelector.filter([
+        vocab(word: 'apple', nextDueRound: 11),
+      ], 10);
 
       expect(result, isEmpty);
     });

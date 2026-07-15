@@ -8,7 +8,7 @@ class Vocab {
   final String mean;
   final Level level;
   final MemoryState memoryState;
-  final int cooldown;
+  final int nextDueRound;
 
   const Vocab({
     required this.id,
@@ -16,7 +16,7 @@ class Vocab {
     required this.mean,
     required this.level,
     required this.memoryState,
-    required this.cooldown,
+    required this.nextDueRound,
   });
 
   Vocab copyWith({
@@ -25,7 +25,7 @@ class Vocab {
     String? mean,
     Level? level,
     MemoryState? memoryState,
-    int? cooldown,
+    int? nextDueRound,
   }) {
     return Vocab(
       id: id ?? this.id,
@@ -33,7 +33,7 @@ class Vocab {
       mean: mean ?? this.mean,
       level: level ?? this.level,
       memoryState: memoryState ?? this.memoryState,
-      cooldown: cooldown ?? this.cooldown,
+      nextDueRound: nextDueRound ?? this.nextDueRound,
     );
   }
 }

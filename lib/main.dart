@@ -24,10 +24,12 @@ void main() async {
   store.updateVocabularyStore(excelRepository.readExcel());
   store.updateApiKeyStore(await secureStorageRepository.readAPI());
   store.updateModelNameStore(await sharedPreferencesRepository.readModelName());
+  store.updateRoundStore(await sharedPreferencesRepository.readRound());
 
   VocabularyViewmodel vocabularyViewmodel = VocabularyViewmodel(
     store: store,
     excelRepository: excelRepository,
+    sharedPreferencesRepository: sharedPreferencesRepository,
   );
 
   runApp(

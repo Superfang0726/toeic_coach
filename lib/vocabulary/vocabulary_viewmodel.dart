@@ -1,5 +1,6 @@
 import 'package:toeic_coach/models/vocab.dart';
 import 'package:toeic_coach/models/vocab_adjustment.dart';
+import 'package:toeic_coach/settings/shared_preferences_repository.dart';
 import 'package:toeic_coach/store/app_store.dart';
 import 'vocab_domain.dart';
 import 'excel_repository.dart';
@@ -7,9 +8,14 @@ import 'excel_repository.dart';
 class VocabularyViewmodel {
   Store store;
   ExcelRepository excelRepository;
+  SharedPreferencesRepository sharedPreferencesRepository;
 
   //constructor
-  VocabularyViewmodel({required this.store, required this.excelRepository});
+  VocabularyViewmodel({
+    required this.store,
+    required this.excelRepository,
+    required this.sharedPreferencesRepository,
+  });
 
   //methods
   void addVocab({
@@ -33,7 +39,7 @@ class VocabularyViewmodel {
       mean: mean,
       level: level,
       memoryState: memoryState,
-      cooldown: 0,
+      nextDueRound: 0,
     );
     currentVocabs.add(newVocab);
 
@@ -86,7 +92,8 @@ class VocabularyViewmodel {
       mean: vocabAdjustment.mean,
       memoryState: newMemoryState,
       level: VocabDomain.inferLevel(newMemoryState),
-      cooldown: VocabDomain.inferCooldown(newMemoryState),
+      nextDueRound:
+          store.currentRound + VocabDomain.inferInterval(newMemoryState),
     );
 
     List<Vocab> updatedVocabs = List.from(store.vocabulary);
@@ -109,18 +116,19 @@ class VocabularyViewmodel {
     }
   }
 
-  void decreaseCooldown() {
-    List<Vocab> updatedVocab = VocabDomain.decreaseCooldown(store.vocabulary);
+  void incrementRound() {
+    final int newRound = store.currentRound + 1;
 
     //write in
-    store.updateVocabularyStore(updatedVocab);
-    excelRepository.writeExcel(updatedVocab);
+    store.updateRoundStore(newRound);
+    sharedPreferencesRepository.writeRound(newRound);
   }
 
-  void applyCooldownForUsedWords(List<String> words) {
-    List<Vocab> updatedVocab = VocabDomain.applyCooldownForUsedWords(
+  void applyDueForUsedWords(List<String> words) {
+    List<Vocab> updatedVocab = VocabDomain.applyDueForUsedWords(
       store.vocabulary,
       words.toSet(),
+      store.currentRound,
     );
 
     //write in
