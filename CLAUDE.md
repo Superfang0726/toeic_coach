@@ -37,7 +37,7 @@ Each feature folder (`chat/`, `vocabulary/`, `settings/`) holds its own UI, View
 
 ### State flows through a single `Store`
 
-`lib/store/app_store.dart` is a `ChangeNotifier` holding the three pieces of global state: `vocabulary` (List<Vocab>), `apiKey`, and `modelName`. It is the **only** `ChangeNotifierProvider` in `main.dart`. ViewModels receive the `Store` by constructor injection, read state from it, and call its `update*` setters to write back. The Excel file is the source of truth on disk; the `Store` is the working copy in memory.
+`lib/store/app_store.dart` is a `ChangeNotifier` holding the four pieces of global state: `vocabulary` (List<Vocab>), `apiKey`, `modelName`, and `currentRound` (the global question-round counter). It is the **only** `ChangeNotifierProvider` in `main.dart`. ViewModels receive the `Store` by constructor injection, read state from it, and call its `update*` setters to write back. The Excel file is the source of truth on disk; the `Store` is the working copy in memory.
 
 `main.dart` bootstraps everything synchronously before `runApp`: it constructs the repositories, hydrates the `Store` from Excel + secure storage + shared preferences, then exposes `Store`, `ExcelRepository`, and `VocabularyViewmodel` via `MultiProvider`.
 
@@ -63,7 +63,7 @@ This is the heart of the app and lives in `lib/vocabulary/vocab_domain.dart` (pu
 
 - Each `Vocab` has a `Level` (red / yellow / green) and a finer `MemoryState` (redLow → redMedium → redHigh → yellowLow → yellowHigh → green).
 - `upgrade`/`downgrade` move a word one step along that chain (downgrades are punitive — a wrong yellow word drops straight to redLow). `inferLevel` derives the coarse `Level` back from the `MemoryState`.
-- `PromptSetter.questionPrompt` (in `lib/chat/`) tells Gemini to use **red/yellow** words as the answer choices and **green** (known) words to build the sentence. `QuestionVocabSelector` (also in `lib/chat/`) selects only words with `cooldown == 0` and shuffles them before passing them into the prompt.
+- `PromptSetter.questionPrompt` (in `lib/chat/`) tells Gemini to use **red/yellow** words as the answer choices and **green** (known) words to build the sentence. `QuestionVocabSelector` (also in `lib/chat/`) selects only due words (`nextDueRound <= currentRound`) and shuffles them before passing them into the prompt. Each answered question increments the persisted `currentRound`; a used word is rescheduled to `currentRound + inferInterval(memoryState)`.
 
 `VocabularyViewmodel.handleVocabAdjustment` is the bridge from Gemini back to the database: if the word exists it applies the upgrade/downgrade and re-infers level; if it's a brand-new word (e.g. one the user flagged as unfamiliar) it adds it as a fresh red word.
 
@@ -73,9 +73,10 @@ This is the heart of the app and lives in `lib/vocabulary/vocab_domain.dart` (pu
 
 ### Persistence
 
-- **Vocabulary** → `ExcelRepository` reads/writes `vocabulary.xlsx` in the app documents directory. Every mutating `VocabularyViewmodel` method writes the whole list back to Excel immediately after updating the `Store`. Columns: `id, word, mean, level, state, cooldown`.
+- **Vocabulary** → `ExcelRepository` reads/writes `vocabulary.xlsx` in the app documents directory. Every mutating `VocabularyViewmodel` method writes the whole list back to Excel immediately after updating the `Store`. Columns: `id, word, mean, level, state, nextDueRound` (legacy files headed `cooldown` read as-is — they predate round persistence, so the countdown value already equals the absolute due round — and upgrade on first write).
 - **API key** → `SecureStorageRepository` (flutter_secure_storage).
 - **Model name** → `SharedPreferencesRepository` (defaults to `gemini-3.1-flash-lite`).
+- **Current round** → `SharedPreferencesRepository` (key `round`, defaults to 0).
 
 ## Conventions & gotchas
 

@@ -69,6 +69,7 @@ class ChatViewModel with ChangeNotifier {
   Future<String> _generateQuestion() async {
     List<Vocab> filteredVocabulary = QuestionVocabSelector.filter(
       _store.vocabulary,
+      _store.currentRound,
     );
     filteredVocabulary = QuestionVocabSelector.shuffle(filteredVocabulary);
     String prompt = PromptSetter.questionPrompt(filteredVocabulary);
@@ -99,13 +100,16 @@ class ChatViewModel with ChangeNotifier {
     );
     _history = history;
 
-    _vocabularyViewModel.decreaseCooldown();
+    // Advance the round before scheduling used words so their next due round
+    // counts from the round that is about to start (matches the old
+    // decrement-then-reset behavior).
+    _vocabularyViewModel.incrementRound();
 
     final List<String> usedWords = [
       ..._options.map((option) => option.word),
       ..._usedGreenWords,
     ];
-    _vocabularyViewModel.applyCooldownForUsedWords(usedWords);
+    _vocabularyViewModel.applyDueForUsedWords(usedWords);
 
     final List<VocabAdjustment?> functionCallsResponse = await _geminiRepository
         .updateMemoryState(_history);

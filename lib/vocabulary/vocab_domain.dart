@@ -70,25 +70,19 @@ class VocabDomain {
     }
   }
 
-  static List<Vocab> decreaseCooldown(List<Vocab> currentVocabs) {
-    return currentVocabs
-        .map(
-          (vocab) => vocab.cooldown > 0
-              ? vocab.copyWith(cooldown: vocab.cooldown - 1)
-              : vocab,
-        )
-        .toList();
-  }
-
-  static List<Vocab> applyCooldownForUsedWords(
+  static List<Vocab> applyDueForUsedWords(
     List<Vocab> currentVocabs,
     Set<String> usedWords,
+    int currentRound,
   ) {
     final lowered = usedWords.map((w) => w.toLowerCase()).toSet();
     return currentVocabs
         .map(
           (vocab) => lowered.contains(vocab.word.toLowerCase())
-              ? vocab.copyWith(cooldown: inferCooldown(vocab.memoryState))
+              ? vocab.copyWith(
+                  nextDueRound:
+                      currentRound + inferInterval(vocab.memoryState),
+                )
               : vocab,
         )
         .toList();
@@ -108,7 +102,7 @@ class VocabDomain {
     }
   }
 
-  static int inferCooldown(MemoryState memoryState) {
+  static int inferInterval(MemoryState memoryState) {
     switch (memoryState) {
       case MemoryState.redLow:
         return 2;

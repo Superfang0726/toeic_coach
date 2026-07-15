@@ -43,7 +43,10 @@ class ExcelRepository {
       MemoryState? memoryState = MemoryState.values.byName(
         row[4]?.value.toString() ?? 'redLow',
       );
-      int cooldown = (row[5]?.value as IntCellValue?)?.value ?? 0;
+      // Legacy files whose 6th column is headed 'cooldown' read correctly
+      // as-is: they predate round persistence, so currentRound is 0 and the
+      // stored countdown C is already the absolute due round (0 + C).
+      int nextDueRound = (row[5]?.value as IntCellValue?)?.value ?? 0;
 
       if (id == null || word == null || mean == null) {
         continue; //TODO: delete the data which is broken.
@@ -56,7 +59,7 @@ class ExcelRepository {
           mean: mean,
           level: level,
           memoryState: memoryState,
-          cooldown: cooldown,
+          nextDueRound: nextDueRound,
         ),
       );
     }
@@ -69,7 +72,7 @@ class ExcelRepository {
 
     final sheet = excel['Sheet1'];
 
-    final headers = ['id', 'word', 'mean', 'level', 'state', 'cooldown'];
+    final headers = ['id', 'word', 'mean', 'level', 'state', 'nextDueRound'];
     for (int i = 0; i < headers.length; i++) {
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
@@ -107,7 +110,7 @@ class ExcelRepository {
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: i + 1))
           .value = IntCellValue(
-        vocabs[i].cooldown,
+        vocabs[i].nextDueRound,
       );
     }
 
