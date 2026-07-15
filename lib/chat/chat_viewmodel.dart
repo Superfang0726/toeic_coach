@@ -116,9 +116,7 @@ class ChatViewModel with ChangeNotifier {
       if (label == null) {
         // Gemini did not place the scheduled word among the options; throw so
         // RetryHandler regenerates instead of showing a wrong question.
-        throw StateError(
-          'Scheduled answer "$_scheduledAnswerWord" missing from options',
-        );
+        throw ScheduledAnswerMissingException(_scheduledAnswerWord!);
       }
       _correctLabel = label;
     } else {
