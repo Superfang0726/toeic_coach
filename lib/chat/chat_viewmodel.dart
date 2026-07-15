@@ -28,6 +28,7 @@ class ChatViewModel with ChangeNotifier {
   late String _sentence;
   late List<Option> _options;
   String _correctLabel = '';
+  String? _scheduledAnswerWord;
   Option? _selectedOption;
   String? _result;
   String? _translation;
@@ -67,19 +68,66 @@ class ChatViewModel with ChangeNotifier {
   }
 
   Future<String> _generateQuestion() async {
-    List<Vocab> filteredVocabulary = QuestionVocabSelector.filter(
+    final Vocab? answer = QuestionVocabSelector.pickAnswerWord(
       _store.vocabulary,
       _store.currentRound,
     );
-    filteredVocabulary = QuestionVocabSelector.shuffle(filteredVocabulary);
-    String prompt = PromptSetter.questionPrompt(filteredVocabulary);
-    final (response, history) = await _geminiRepository.generateQuestion(
-      prompt,
-    );
+    _scheduledAnswerWord = answer?.word;
 
+    final String prompt;
+    if (answer != null) {
+      final distractors = QuestionVocabSelector.shuffle(
+        QuestionVocabSelector.distractorPool(_store.vocabulary, answer),
+      );
+      final greens = QuestionVocabSelector.shuffle(
+        QuestionVocabSelector.greenPool(_store.vocabulary),
+      );
+      prompt = PromptSetter.questionPrompt(answer, distractors, greens);
+    } else {
+      prompt = PromptSetter.novelQuestionPrompt();
+    }
+
+    final (response, history) = await _geminiRepository.generateQuestion(prompt);
     _history = history;
 
-    return response.text ?? 'No response got';
+    final text = response.text ?? 'No response got';
+    _parseQuestion(text);
+    return text;
+  }
+
+  void _parseQuestion(String modelResponse) {
+    final cleanedText = modelResponse.trim().replaceAll('```', '');
+    final map = jsonDecode(cleanedText);
+    _sentence = map['sentence'];
+    final opts = map['options'] as Map<String, dynamic>;
+    _options = ['A', 'B', 'C', 'D'].map((k) {
+      final word = VocabDomain.canonicalizeWord(
+        _store.vocabulary,
+        opts[k] as String,
+      );
+      return Option(label: k, word: word);
+    }).toList();
+
+    if (_scheduledAnswerWord != null) {
+      final label = QuestionVocabSelector.resolveAnswerLabel(
+        _options,
+        _scheduledAnswerWord!,
+      );
+      if (label == null) {
+        // Gemini did not place the scheduled word among the options; throw so
+        // RetryHandler regenerates instead of showing a wrong question.
+        throw StateError(
+          'Scheduled answer "$_scheduledAnswerWord" missing from options',
+        );
+      }
+      _correctLabel = label;
+    } else {
+      _correctLabel = map['answer'] as String;
+    }
+
+    _usedGreenWords = ((map['usedGreenWords'] as List?) ?? const [])
+        .map((e) => e as String)
+        .toList();
   }
 
   Future<String> _userResponse(
@@ -152,22 +200,6 @@ class ChatViewModel with ChangeNotifier {
       );
 
       if (modelResponse != null) {
-        final cleanedText = modelResponse.trim().replaceAll('```', '');
-        final map = jsonDecode(cleanedText);
-        _sentence = map['sentence'];
-        final opts = map['options'] as Map<String, dynamic>;
-        _options = ['A', 'B', 'C', 'D'].map((k) {
-          final word = VocabDomain.canonicalizeWord(
-            _store.vocabulary,
-            opts[k] as String,
-          );
-          return Option(label: k, word: word);
-        }).toList();
-        _correctLabel = map['answer'] as String;
-        _usedGreenWords = ((map['usedGreenWords'] as List?) ?? const [])
-            .map((e) => e as String)
-            .toList();
-
         chatState = ChatState.displayingQuestion;
         notifyListeners();
       } else {
