@@ -3,6 +3,16 @@ import 'dart:io';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 
+/// Thrown when a generated question does not contain the scheduled answer
+/// word among its options, signalling that the question must be regenerated.
+class ScheduledAnswerMissingException implements Exception {
+  final String word;
+  ScheduledAnswerMissingException(this.word);
+  @override
+  String toString() =>
+      'ScheduledAnswerMissingException: "$word" not found in options';
+}
+
 class RetryHandler {
   /// Retries [callback] on transient errors up to [maxTimes] with exponential
   /// backoff. Each attempt is bounded by [timeout]; exceeding it counts as a
@@ -38,6 +48,8 @@ class RetryHandler {
   /// with a "Server Error [5xx]" message. So we classify by what we are
   /// confident is transient, and treat everything else as permanent.
   static bool _isRetryable(Object error) {
+    // A question missing its scheduled answer word must be regenerated.
+    if (error is ScheduledAnswerMissingException) return true;
     // Network layer — almost always transient.
     if (error is SocketException || error is TimeoutException) return true;
     // 5xx server errors are transient; the bad-key / permission / bad-request
