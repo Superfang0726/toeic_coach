@@ -67,11 +67,13 @@ class ChatViewModel with ChangeNotifier {
     _geminiRepository.init(apiKey: _store.apiKey, modelName: _store.modelName);
   }
 
-  Future<String> _generateQuestion() async {
-    final Vocab? answer = QuestionVocabSelector.pickAnswerWord(
-      _store.vocabulary,
-      _store.currentRound,
-    );
+  Future<String> _generateQuestion({bool forceNovel = false}) async {
+    final Vocab? answer = forceNovel
+        ? null
+        : QuestionVocabSelector.pickAnswerWord(
+            _store.vocabulary,
+            _store.currentRound,
+          );
     _scheduledAnswerWord = answer?.word;
 
     final String prompt;
@@ -186,7 +188,7 @@ class ChatViewModel with ChangeNotifier {
     notifyListeners();
 
     //Generate question
-    final String? modelResponse;
+    String? modelResponse;
     try {
       modelResponse = await RetryHandler.retryHandler(
         _generateQuestion,
@@ -196,6 +198,21 @@ class ChatViewModel with ChangeNotifier {
           notifyListeners();
         },
       );
+
+      // Normal mode picks the same most-overdue word every attempt, so a word
+      // Gemini repeatedly fails to place would wedge generation. When that
+      // exhausts the retries (a scheduled word was set but never landed), fall
+      // back to a novel question so the round can still advance.
+      if (modelResponse == null && _scheduledAnswerWord != null) {
+        modelResponse = await RetryHandler.retryHandler(
+          () => _generateQuestion(forceNovel: true),
+          5,
+          onRetry: (currentTimes) {
+            _retryTimes = currentTimes;
+            notifyListeners();
+          },
+        );
+      }
 
       if (modelResponse != null) {
         chatState = ChatState.displayingQuestion;
