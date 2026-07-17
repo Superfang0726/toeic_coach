@@ -12,9 +12,11 @@ class QuestionVocabSelector {
 
   /// The most overdue red/yellow word at [currentRound] (max
   /// `currentRound - nextDueRound`, random tiebreak among ties), or `null`
-  /// when nothing is due. That `null` is a mode signal, not just "no
-  /// result": `ChatViewModel` reads it as the trigger to fall back to novel
-  /// mode instead of testing a scheduled word.
+  /// when nothing is due.
+  ///
+  /// That `null` is a mode signal, not just "no result": `ChatViewModel`
+  /// reads it as the trigger to fall back to novel mode instead of testing
+  /// a scheduled word.
   static Vocab? pickAnswerWord(
     List<Vocab> vocabulary,
     int currentRound, {
@@ -60,6 +62,7 @@ class QuestionVocabSelector {
 
   /// Finds which [options] label holds [answerWord] (case-insensitive), or
   /// `null` if Gemini omitted the scheduled word from its own options.
+  ///
   /// `ChatViewModel` treats that `null` as `ScheduledAnswerMissingException`,
   /// which `RetryHandler` retries by regenerating the question.
   static String? resolveAnswerLabel(List<Option> options, String answerWord) {
