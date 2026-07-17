@@ -14,8 +14,10 @@ class VocabDomain {
 
   /// Returns the word using the database's canonical casing when a
   /// case-insensitive match exists; otherwise returns the word lowercased as
-  /// the display convention for model-invented distractors. Keeps option text
-  /// visually consistent and stops casing drift from creating duplicate words.
+  /// the display convention for model-invented distractors.
+  ///
+  /// Keeps option text visually consistent and stops casing drift from
+  /// creating duplicate words.
   static String canonicalizeWord(List<Vocab> currentVocabs, String word) {
     for (final vocab in currentVocabs) {
       if (vocab.word.toLowerCase() == word.toLowerCase()) {
