@@ -20,6 +20,7 @@ class ChatViewModel with ChangeNotifier {
   //chatViewModel's default states
   List<Content> _history = [];
   List<String> _unfamiliarWords = [];
+  List<String> _unfamiliarOptionWords = [];
   ChatState chatState = ChatState.waitingUserGenerateQuestion;
   int _retryTimes = 0;
   String? _errorMessage;
@@ -38,6 +39,7 @@ class ChatViewModel with ChangeNotifier {
   List<String> _usedGreenWords = [];
 
   List<String> get unfamiliarWords => _unfamiliarWords;
+  List<String> get unfamiliarOptionWords => _unfamiliarOptionWords;
   String get sentence => _sentence;
   List<Option> get options => _options;
   String get correctLabel => _correctLabel;
@@ -135,12 +137,14 @@ class ChatViewModel with ChangeNotifier {
     Option correctAnswer,
     bool isCorrect,
     List<String> unfamiliarWords,
+    List<String> unfamiliarOptionWords,
   ) async {
     String prompt = PromptSetter.reviewPrompt(
       userAnswer,
       correctAnswer,
       isCorrect,
       unfamiliarWords,
+      unfamiliarOptionWords,
     );
     final (response, history) = await _geminiRepository.reviewUserAnswer(
       prompt,
@@ -180,6 +184,7 @@ class ChatViewModel with ChangeNotifier {
     //init member variables
     _retryTimes = 0;
     _unfamiliarWords = [];
+    _unfamiliarOptionWords = [];
     _selectedOption = null;
     _errorMessage = null;
 
@@ -246,6 +251,7 @@ class ChatViewModel with ChangeNotifier {
           correctOption,
           _isCorrect!,
           unfamiliarWords,
+          _unfamiliarOptionWords,
         ),
         5,
         onRetry: (currentTimes) {
@@ -304,6 +310,15 @@ class ChatViewModel with ChangeNotifier {
 
   void toggleOption(Option option) {
     _selectedOption = option;
+    notifyListeners();
+  }
+
+  void toggleOptionUnfamiliar(Option option) {
+    if (_unfamiliarOptionWords.contains(option.word)) {
+      _unfamiliarOptionWords.remove(option.word);
+    } else {
+      _unfamiliarOptionWords.add(option.word);
+    }
     notifyListeners();
   }
 }
