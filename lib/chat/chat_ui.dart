@@ -171,6 +171,9 @@ class _ChatUiState extends State<ChatUi> {
                         child: _buildOptionCard(
                           option,
                           _chatViewModel.selectedOption == option,
+                          _chatViewModel.unfamiliarOptionWords.contains(
+                            option.word,
+                          ),
                         ),
                       ),
                     ),
@@ -438,26 +441,58 @@ class _ChatUiState extends State<ChatUi> {
   }
 
   // A single answer option rendered as a card with an A/B/C/D badge.
-  Widget _buildOptionCard(Option option, bool selected) {
+  // Left click selects it as the answer; right click flags it unfamiliar.
+  // The two states are independent and rendered independently: selection
+  // controls the card's background/border/checkmark, unfamiliar adds a
+  // warning badge in the corner regardless of selection.
+  Widget _buildOptionCard(Option option, bool selected, bool unfamiliar) {
     return GestureDetector(
       onTap: () => _chatViewModel.toggleOption(option),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: selected ? kPrimaryLight : kSurface,
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(
-            color: selected ? kPrimary : kBorder,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: _buildOptionShell(
-          option: option,
-          badgeColor: selected ? kSurface : kPrimaryLight,
-          trailing: selected
-              ? const Icon(Icons.check_circle, color: kPrimary)
-              : null,
+      onSecondaryTap: () => _chatViewModel.toggleOptionUnfamiliar(option),
+      child: Tooltip(
+        message: '右鍵標記為不熟悉單字',
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: selected ? kPrimaryLight : kSurface,
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                  color: selected ? kPrimary : kBorder,
+                  width: selected ? 2 : 1,
+                ),
+              ),
+              child: _buildOptionShell(
+                option: option,
+                badgeColor: selected ? kSurface : kPrimaryLight,
+                trailing: selected
+                    ? const Icon(Icons.check_circle, color: kPrimary)
+                    : null,
+              ),
+            ),
+            if (unfamiliar)
+              Positioned(
+                top: -6,
+                right: -6,
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: kWarning,
+                  ),
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
