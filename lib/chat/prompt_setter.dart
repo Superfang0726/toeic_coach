@@ -54,6 +54,7 @@ Workflow:
     Option correctAnswer,
     bool isCorrect,
     List<String> unfamiliarWords,
+    List<String> unfamiliarOptionWords,
   ) {
     StringBuffer buffer = StringBuffer();
     buffer.writeln(
@@ -73,19 +74,79 @@ Workflow:
       }
     }
 
-    buffer.writeln("""
-Goal: Explain the result above to user in traditional chinese, and record memoryState adjustments in the "memoryStateUpdateResult" field. Correctness is already determined above, do not re-judge it.
-Workflow:
-1. In "result", tell user in one short sentence whether the answer is correct, and if wrong, which option is correct. Do not explain why there.
-2. If the answer is wrong, explain in "review" why the correct option fits the blank and why user's choice does not.
-3. Record an entry with word "${correctAnswer.word}" and adjustment "${isCorrect ? 'upgrade' : 'downgrade'}" in "memoryStateUpdateResult".
-""");
+    final List<String> optionWordsToDowngrade = unfamiliarOptionWords
+        .where((word) => word != correctAnswer.word)
+        .toList();
+    if (optionWordsToDowngrade.isNotEmpty) {
+      buffer.writeln('User also marked these answer options as unfamiliar:');
+      for (String word in optionWordsToDowngrade) {
+        buffer.writeln('$word,');
+      }
+    }
+
+    final bool correctFlaggedUnfamiliar =
+        unfamiliarOptionWords.contains(correctAnswer.word);
+    final String correctAdjustment =
+        (isCorrect && !correctFlaggedUnfamiliar) ? 'upgrade' : 'downgrade';
+
+    buffer.writeln(
+      'Goal: Explain the result above to user in traditional chinese, and '
+      'record memoryState adjustments in the "memoryStateUpdateResult" '
+      'field. Correctness is already determined above, do not re-judge it.',
+    );
+    buffer.writeln('Workflow:');
+
+    int step = 1;
+    buffer.writeln(
+      '$step. In "result", tell user in one short sentence whether the '
+      'answer is correct, and if wrong, which option is correct. Do not '
+      'explain why there.',
+    );
+    step++;
+    buffer.writeln(
+      '$step. If the answer is wrong, explain in "review" why the correct '
+      "option fits the blank and why user's choice does not.",
+    );
+    step++;
+
+    final String correctStep =
+        '$step. Record an entry with word "${correctAnswer.word}" and '
+        'adjustment "$correctAdjustment" in "memoryStateUpdateResult".';
+    buffer.writeln(
+      (correctFlaggedUnfamiliar && isCorrect)
+          ? '$correctStep Even though this answer is correct, the user '
+              'marked it unfamiliar, so it must be downgraded, not upgraded.'
+          : correctStep,
+    );
+    step++;
 
     if (unfamiliarWords.isNotEmpty) {
-      buffer.writeln("""
-4. Explain in "review" the meaning of each unfamiliar vocabulary as it is used in the sentence.
-5. Record an entry with adjustment "downgrade" in "memoryStateUpdateResult" for every unfamiliar vocabulary listed above.
-""");
+      buffer.writeln(
+        '$step. Explain in "review" the meaning of each unfamiliar '
+        'vocabulary from the first unfamiliar list as it is used in the '
+        'sentence.',
+      );
+      step++;
+      buffer.writeln(
+        '$step. Record an entry with adjustment "downgrade" in '
+        '"memoryStateUpdateResult" for every unfamiliar vocabulary in that '
+        'first list.',
+      );
+      step++;
+    }
+
+    if (optionWordsToDowngrade.isNotEmpty) {
+      buffer.writeln(
+        '$step. Explain in "review" what each unfamiliar answer option '
+        'word above means.',
+      );
+      step++;
+      buffer.writeln(
+        '$step. Record an entry with adjustment "downgrade" in '
+        '"memoryStateUpdateResult" for every word in that answer-option '
+        'list, even if it is also the correct or user-selected option.',
+      );
+      step++;
     }
 
     return buffer.toString();
